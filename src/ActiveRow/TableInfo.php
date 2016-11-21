@@ -19,6 +19,8 @@ class TableInfo
 	public $relateds = [];
 	
 	public $defaultOrder = null;
+
+	public $events = [];
 	
 	public function parseClass($cn)
 	{
@@ -64,8 +66,20 @@ class TableInfo
 		{
 			$this->defaultOrder = $anns['defaultOrder'][0];
 		}
+
+		if (isset($anns['event']))
+		{
+			foreach($anns['event'] as $ev)
+			{
+				$tmp = split(' ', $ev);
+				if (count($tmp) == 2)
+					$this->events[$tmp[0]] = $tmp[1];
+				else
+					$this->events[$tmp[0]] = $tmp[0];
+			}
+		}	
 	}
-	
+
 	public function existsCol($col) 
 	{
 		return isset($this->columns[$col]) || isset($this->fkColumns[$col]);
@@ -105,5 +119,22 @@ class TableInfo
 		return ($p === false)
 			? ['', $className]
 			: [substr($className, 0, $p), substr($className, $p + 1)];
+	}
+
+	protected $_columnNames = null;
+
+	public function getColumnNames()
+	{
+		if ($this->_columnNames === null)
+		{
+			$this->_columnNames = [];
+			foreach($this->columns as $colName => $col)
+			{
+				// dump($col);
+				$this->_columnNames[] = $colName; //$col->propertyName; 
+			}
+		}
+
+		return $this->_columnNames;
 	}
 }

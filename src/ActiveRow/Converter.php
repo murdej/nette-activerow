@@ -23,7 +23,7 @@ class Converter
 		if ($value === null)
 		{
 			if ($columnInfo->nullable) return null;
-			else throw new \Exception("Column $columnInfo->fullName is not nullable");
+			else throw new \Exception("Column ".($columnInfo->tableInfo ? $columnInfo->tableInfo->className.'::' : '')."$columnInfo->fullName is not nullable");
 		}
 		if ($columnInfo->fkClass && $col == $columnInfo->propertyName) 
 		{
@@ -36,8 +36,12 @@ class Converter
 			{
 				case 'int':
 					return (int)$value;
+				case 'decimal':
+					return (double)$value;
 				case 'double':
 					return (double)$value;
+				case 'float':
+					return (float)$value;
 				case 'json':
 					return json_decode($value);
 				case 'string':
@@ -64,9 +68,10 @@ class Converter
 							throw new \Exception("Invalid bool value $value");
 					}
 				case 'DateTime':
-					$dt = new \DateTime();
+					/*$dt = new \DateTime();
 					$dt->setTimestamp((int)$value);
-					return $dt;
+					return $dt; */
+					return $value;
 				default:
 					throw new \Exception("Unknown type ".($columnInfo->tableInfo ? $columnInfo->tableInfo->className.'::' : '')."$columnInfo->type");
 					
@@ -74,6 +79,7 @@ class Converter
 		}
 	}
 
+	// Konverze z entity do DB
 	public function convertFrom($value, $columnInfo)
 	{
 		if ($value === null) return null;
@@ -88,7 +94,7 @@ class Converter
 				case 'json':
 					return json_encode($value);
 				case 'DateTime':
-					return $value->getTimestamp();
+					return $value; // $value->getTimestamp();
 			}
 			return $value;
 		}

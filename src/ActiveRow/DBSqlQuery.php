@@ -9,23 +9,40 @@ class DBSqlQuery extends DBCollection
 	protected $vars = [];
 	
 	protected $query = "";
+
+	protected $_selection = null;
 	
 	public function getSelection()
 	{
-		return $this->exec();
+		if ($this->_selection === null)
+			$this->_selection = $this->exec();
+
+		return $this->_selection;
 	}
 	
 	public function __construct(DBRepository $repo)
 	{
-		$this->repo = $repo;
+		$this->repository = $repo;
 	}
 	
 	public function value($val)
 	{
-		$this->query .= '?';
+		$this->query .= '? ';
 		$this->vars[] = $val;
 		return $this;
 	}
+
+	public function values($vals, $sep = ', ')
+	{
+		$f = true;
+		foreach ($vals as $val) {
+			if ($f) $f = false;
+			else $this->query .= $sep;
+			$this->query .= '? ';
+			$this->vars[] = $val;		
+		}
+		return $this;
+	}	
 	
 	public function code($code)
 	{
@@ -41,15 +58,22 @@ class DBSqlQuery extends DBCollection
 	{
 		try
 		{
-			return call_user_func_array(
-				array($this->repo->db, 'query'), 
+			$res = call_user_func_array(
+				array($this->repository->db, 'query'), 
 				array_merge(array($this->query), $this->vars)
 			);
+
+			return $res;
 		} 
 		catch(\Nette\InvalidArgumentException $exc)
 		{
 			dump($this->query, $this->vars);
 			throw $exc;
 		}
+	}
+
+	public function getAsRows()
+	{
+		return $this->exec();
 	}
 }

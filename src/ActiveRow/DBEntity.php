@@ -51,7 +51,7 @@ class DBEntity extends \Nette\Object
 				if ($reflexion->hasMethod($methodName)) break;
 				
 				dump($dbi);
-				throw new \Exception("Property $col is not defined.");
+				throw new \Exception("Property $reflexion->name::$col is not defined.");
 			} while(false);
 			return $this->entity->$methodName();
 		}
@@ -96,14 +96,34 @@ class DBEntity extends \Nette\Object
 		return TableInfo::get($className);
 	}
 	
+	public function isNew()
+	{
+		return is_array($this->src);
+	}
+
 	public function convertFromSrc($col)
 	{
-		$val = (!is_array($this->src) || array_key_exists($col, $this->src))
+		$val = null;
+		if (is_array($this->src))
+		{
+			if (array_key_exists($col, $this->src))
+				$val = $this->src[$col];
+			else
+				$val = array_key_exists($col, $this->defaults)
+					? $this->defaults[$col]
+					: null;
+		} 
+		else 
+		{
+			$val = $this->src->$col;
+		}
+
+		/* $val = (!is_array($this->src) || array_key_exists($col, $this->src))
 			? $this->src[$col]
 			: (array_key_exists($col, $this->defaults)
 				? $this->defaults[$col]
 				: null
-			);
+			); */
 		
 		return Converter::get()->convertTo($val, $this->dbInfo->columns[$col], $col);
 	}
@@ -149,20 +169,36 @@ class DBEntity extends \Nette\Object
 	
 	public function save()
 	{
+		$this->callEvent('beforeSave');
 		if (is_array($this->src))
 		{
+			$this->callEvent('beforeInsert');
 			// Nový záznam
-			$this->src = DBRepository::getDatabase(null)
+			$this->src = DBRepository::getDatabase(null, $this->dbInfo)
 				->table($this->dbInfo->tableName)
 				->insert($this->getModifiedDbData(true));
+			$this->callEvent('afterInsert');
 		}
 		else if (get_class($this->src) == 'Nette\\Database\\Table\\ActiveRow')
 		{
+			$this->callEvent('beforeUpdate');
 			$this->src->update($this->getModifiedDbData(false));
 			$this->converted = [];
 			$this->modified = [];
+			$this->callEvent('afterInsert');
 		} else {
 			throw new \Exception("Can not use Save");
+		}
+		$this->callEvent('afterSave');
+	}
+
+	protected function callEvent($event)
+	{
+		$dbi = $this->dbInfo;
+		if (isset($dbi->events[$event]))
+		{
+			$method = $dbi->events[$event];
+			$this->entity->$method($event);
 		}
 	}
 	

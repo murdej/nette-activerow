@@ -4,7 +4,7 @@ namespace  Murdej\DataMapper;
 
 class DBRepository extends \Nette\Object
 {
-	/** @var NdbContext */
+	/** @var Nette\Database\Context */
 	public $database = null;
 	
 	public $className = null;
@@ -24,13 +24,16 @@ class DBRepository extends \Nette\Object
 	
 	public static function getDatabase($db, $tableInfo)
 	{
-		if ($db) return $db;
-		if (self::$databaseCreator)
+		if (!$db) 
 		{
-			$fn = self::$databaseCreator;
-			return $fn($tableInfo);
+			if (self::$databaseCreator)
+			{
+				$fn = self::$databaseCreator;
+				$db = $fn($tableInfo);
+			} else throw new \Exception("You need to pass \$database in the constructor or set factory to DBRepository::\$databaseCreator");
 		}
-		throw new \Exception("You need to pass \$database in the constructor or set factory to DBRepository::\$databaseCreator");
+		if ($db instanceof \Nette\Database\Context) return $db;
+		else throw new \Exception("\$database is not instance of Nette\Database\Context.");
 	}
 	
 	public function getTableInfo()
@@ -48,7 +51,10 @@ class DBRepository extends \Nette\Object
 		$sel = $this->newTable();
 		foreach($params as $k => $v)
 		{
-			$sel->where($k, $v);
+			if (is_int($k))
+				$sel->where($v);
+			else
+				$sel->where($k, $v);
 		}
 		$sel->limit(1);
 		// $sel->select('*');

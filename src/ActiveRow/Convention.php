@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class Convention
 {

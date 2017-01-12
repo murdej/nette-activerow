@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class DBRepository extends \Nette\Object
 {
@@ -87,4 +87,46 @@ class DBRepository extends \Nette\Object
 	{
 		return new DBSqlQuery($this);
 	}
+
+	public function query($query, ...$params)
+	{
+		return new DBSqlQuery($this, $this->db->query($query, ...$params)); 
+	}
+
+	public function nmRelSave($table, $keyName, $keyValue, $itemName, $itemValues)
+	{
+		foreach ($itemValues as $i => $value) 
+		{
+			if ($value == '') $itemValues[$i] = null;
+		}
+		$curValues = $this->db->table($table)
+			->select($itemName)
+			->where($keyName, $keyValue)
+			->fetchPairs(null, $itemName);
+		// Delete
+		$deleted = array_diff($curValues, $itemValues);
+		if ($deleted)
+			$this->db->table($table)
+				->where($keyName, $keyValue)
+				->where($itemName, $deleted)
+				->delete();
+		$inserted = array_diff($itemValues, $curValues);
+		if ($inserted)
+		{
+			$data = [];
+			foreach($inserted as $item) $data[] = [
+				$keyName => $keyValue, 
+				$itemName => $item
+			];
+			$this->db->query('INSERT INTO '.$table, $data);
+		}
+	} 
+
+	public function nmRelLoad($table, $keyName, $keyValue, $itemName)
+	{
+		return $this->db->table($table)
+			->select($itemName)
+			->where($keyName, $keyValue)
+			->fetchPairs(null, $itemName);
+	} 
 }

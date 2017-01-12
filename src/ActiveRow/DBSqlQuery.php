@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class DBSqlQuery extends DBCollection
 {
@@ -20,9 +20,10 @@ class DBSqlQuery extends DBCollection
 		return $this->_selection;
 	}
 	
-	public function __construct(DBRepository $repo)
+	public function __construct(DBRepository $repo, $selection = null)
 	{
 		$this->repository = $repo;
+		$this->_selection = $selection;
 	}
 	
 	public function value($val)
@@ -50,8 +51,17 @@ class DBSqlQuery extends DBCollection
 		return $this;
 	}
 	
+	public function identifier($code)
+	{
+		//todo: escape identifier name
+		$this->query .= $code;
+		return $this;
+	}
+	
 	public function c($code) { return $this->code($code); }
 	
+	public function i($code) { return $this->identifier($code); }
+
 	public function v($value) { return $this->value($value); }
 	
 	public function exec()

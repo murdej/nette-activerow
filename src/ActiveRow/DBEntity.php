@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 use Nette\Reflection\ClassType;
 
@@ -64,6 +64,7 @@ class DBEntity extends \Nette\Object
 		if ($dbi->existsCol($col))
 		{
 			$colDef = $dbi->columns[$col];
+			if ($colDef->blankNull && !$value) $value = null;
 			if ($colDef->fkClass && $col == $colDef->propertyName)
 				throw new \Exception("Cannot replace fk object $col.");
 			if (!array_key_exists($col, $this->converted) || $this->converted[$col] != $value)
@@ -107,15 +108,40 @@ class DBEntity extends \Nette\Object
 		if (is_array($this->src))
 		{
 			if (array_key_exists($col, $this->src))
+			{
 				$val = $this->src[$col];
+			}
 			else
-				$val = array_key_exists($col, $this->defaults)
-					? $this->defaults[$col]
-					: null;
+			{
+				if (array_key_exists($col, $this->defaults))
+				{
+					$val = $this->defaults[$col];
+				} else {
+					$colDef = $this->getDbInfo()->columns[$col];
+					// Volání FKO na novém objektu
+					if ($colDef->fkClass && $col == $colDef->propertyName)
+					{
+						$className = $colDef->fkClass; 
+						$val = $className::get($this->get($colDef->columnName));
+						$val = $val ? $val->_dbEntity->src : null;
+					}
+				}
+			}
 		} 
 		else 
 		{
-			$val = $this->src->$col;
+			if (!isset($this->src[$col]))
+			{
+				$colDef = $this->getDbInfo()->columns[$col];
+				// Volání FKO na view
+				if ($colDef->fkClass && $col == $colDef->propertyName)
+				{
+					$className = $colDef->fkClass; 
+					$val = $className::get($this->get($colDef->columnName));
+					$val = $val ? $val->_dbEntity->src : null;
+				}
+			} 
+			else 	$val = $this->src->$col;
 		}
 
 		/* $val = (!is_array($this->src) || array_key_exists($col, $this->src))
@@ -133,6 +159,7 @@ class DBEntity extends \Nette\Object
 		$this->entity = $entity;
 		$this->src = $src;
 		$this->defaults = &$this->getDbInfo()->defaults;
+		
 	}
 	
 	public function getModifiedDbData($forInsert = false)
@@ -177,6 +204,8 @@ class DBEntity extends \Nette\Object
 			$this->src = DBRepository::getDatabase(null, $this->dbInfo)
 				->table($this->dbInfo->tableName)
 				->insert($this->getModifiedDbData(true));
+			$this->converted = [];
+			$this->modified = [];
 			$this->callEvent('afterInsert');
 		}
 		else if (get_class($this->src) == 'Nette\\Database\\Table\\ActiveRow')

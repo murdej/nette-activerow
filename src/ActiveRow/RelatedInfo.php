@@ -1,8 +1,8 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
-use \Murdej\DataMapper\TableInfo;
+use \Murdej\ActiveRow\TableInfo;
 
 class RelatedInfo extends \Nette\Object
 {

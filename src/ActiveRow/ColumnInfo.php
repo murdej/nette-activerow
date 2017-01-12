@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class ColumnInfo extends \Nette\Object
 {
@@ -25,6 +25,8 @@ class ColumnInfo extends \Nette\Object
 	public $forInsert = true;
 	
 	public $nullable = false;
+
+	public $blankNull = false;
 	
 	public $forUpdate = true;
 	
@@ -79,6 +81,7 @@ class ColumnInfo extends \Nette\Object
 							case 'serialize':
 							case 'nullable':
 							case 'autoIncrement':
+							case 'blankNull':
 								$this->$flag = $flagValue;
 								break;
 							case 'fk':

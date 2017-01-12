@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class TableInfo
 {
@@ -42,6 +42,12 @@ class TableInfo
 			}
 			else throw new Exception("Invalid table def $anns[dbTable][0]");
 		}
+		// Výchzí hodnoty
+		if (isset($anns['defaultValues']))
+		{
+			//todo: Další možnosti - jiný název metody, statická property
+			$this->defaults = $cn::defaultValues();
+		}
 		
 		if (!isset($anns['property'])) throw new Exception("Must define any property");
 		foreach($anns['property'] as $pa)
@@ -71,7 +77,7 @@ class TableInfo
 		{
 			foreach($anns['event'] as $ev)
 			{
-				$tmp = split(' ', $ev);
+				$tmp = explode(' ', $ev);
 				if (count($tmp) == 2)
 					$this->events[$tmp[0]] = $tmp[1];
 				else
@@ -132,6 +138,7 @@ class TableInfo
 			{
 				// dump($col);
 				$this->_columnNames[] = $colName; //$col->propertyName; 
+				// if ($col->fkClass) $this->_columnNames[] = $col->propertyName;
 			}
 		}
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class DBCollection extends \Nette\Object implements \Iterator, \ArrayAccess, \Countable
 {
@@ -74,10 +74,18 @@ class DBCollection extends \Nette\Object implements \Iterator, \ArrayAccess, \Co
 		$res = [];
 		foreach($this as $row)
 		{
-			$k = $row->$k;
-			$res[$k] = $value ? $row->$value : $row;
+			if ($key)
+			{
+				$k = $row->$key;
+				$res[$k] = $value ? $row->$value : $row;
+			} else $res[] = $value ? $row->$value : $row;
 		}
 
 		return $res;
+	}
+
+	public function fetchField($field = 0)
+	{
+		return $this->getSelection()->fetchField($field);
 	}
 }

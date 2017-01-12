@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class BaseEntity 
 {
@@ -57,7 +57,7 @@ class BaseEntity
 	}
 	
 	/**
-	@return Murdej\DataMapper\DBRepository
+	@return Murdej\ActiveRow\DBRepository
 	**/
 	public static function repository($db = null)
 	{

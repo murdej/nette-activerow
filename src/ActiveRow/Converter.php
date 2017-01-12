@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class Converter
 {
@@ -23,7 +23,12 @@ class Converter
 		if ($value === null)
 		{
 			if ($columnInfo->nullable) return null;
-			else throw new \Exception("Column ".($columnInfo->tableInfo ? $columnInfo->tableInfo->className.'::' : '')."$columnInfo->fullName is not nullable");
+			// u autoIncrement je načtení hodnoty null povoleno aby bylo možné testovat jestli je objekt nový
+			if ($columnInfo->autoIncrement) return null;
+			// u fk je načtení hodnoty null povoleno aby bylo možné testovat jestli je nastaveno
+			if ($columnInfo->fkClass) return null;
+			 
+			throw new \Exception("Column ".($columnInfo->tableInfo ? $columnInfo->tableInfo->className.'::' : '')."$columnInfo->fullName is not nullable");
 		}
 		if ($columnInfo->fkClass && $col == $columnInfo->propertyName) 
 		{
@@ -43,7 +48,7 @@ class Converter
 				case 'float':
 					return (float)$value;
 				case 'json':
-					return json_decode($value);
+					return json_decode($value, true);
 				case 'string':
 					return (string)$value;
 				case 'bool':
@@ -56,6 +61,7 @@ class Converter
 						case $value === 'off':
 						case $value === "\x00":
 						case $value === false;
+						case $value === '0';
 							return false;
 						case $value === 1:
 						case $value === 'true':
@@ -63,6 +69,7 @@ class Converter
 						case $value === 'on':
 						case $value === "\x01":
 						case $value === true:
+						case $value === '1';
 							return true;
 						default:
 							throw new \Exception("Invalid bool value $value");
@@ -95,6 +102,8 @@ class Converter
 					return json_encode($value);
 				case 'DateTime':
 					return $value; // $value->getTimestamp();
+				case 'int':
+					return $value === '' ? null : (int)$value;
 			}
 			return $value;
 		}

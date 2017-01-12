@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\DataMapper;
+namespace  Murdej\ActiveRow;
 
 class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \ArrayAccess, \Countable
 {
@@ -40,6 +40,23 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 		} else call_user_func_array([$this->selection, 'where'], $args);
 		return $this;
 	}
+
+	public function whereOr(...$args)
+	{
+		$this->selection->whereOr(...$args);
+		/*$args = func_get_args();
+		if (count($args) == 1 && is_array($args[0]))
+		{
+			foreach ($args[0] as $key => $value) 
+			{
+				if (is_int($key))
+					$this->selection->where($value);
+				else
+					$this->selection->where([$key => $value]);
+			}
+		} else call_user_func_array([$this->selection, 'whereOr'], $args);
+		return $this;*/
+	}
 	
 	public function limit($limit, $offset = null)
 	{
@@ -52,6 +69,16 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 		return call_user_func_array([$this->selection, 'sum'], func_get_args());
 	}
 	
+	public function delete()
+	{
+		return call_user_func_array([$this->selection, 'delete'], func_get_args());
+	}
+
+	public function max()
+	{
+		return call_user_func_array([$this->selection, 'max'], func_get_args());
+	}
+
 	public function toArray()
 	{
 		$res = [];

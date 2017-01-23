@@ -9,9 +9,12 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 	function __construct($repo, $selection = null)
 	{
 		$this->repository = $repo;
-		$this->selection = $selection ? $selection : $repo->newTable();
-		$order = $this->repository->tableInfo->defaultOrder;
-		if ($order) $this->order($order);
+		if ($selection === false)
+			$this->selection =$repo->newTable()->where(['1 = 0']);
+		else
+			$this->selection = $selection ? $selection : $repo->newTable();
+		// $order = $this->repository->tableInfo->defaultOrder;
+		// if ($order) $this->order($order);
 	}
 		
 	public function order($columns)
@@ -22,6 +25,10 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 
 	public function getSelection()
 	{
+		$this->selection->select('`'.$this->repository->tableInfo->tableName.'`.*');
+		$order = $this->repository->tableInfo->defaultOrder;
+		if ($order) $this->order($order);
+		
 		return $this->selection;
 	}
 	

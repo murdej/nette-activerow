@@ -30,7 +30,7 @@ abstract class BaseQO
 			$this->fullCount = $q->count();
 		}
 
-		$this->mode = 'count';
+		$this->mode = 'data';
 		$q = $this->createQuery();
 		$this->prepareQuery($q);
 		if (method_exists($this, 'setupLimit')) $this->setupLimit($q);

@@ -32,9 +32,22 @@ class DBEntity extends \Nette\Object
 		else if ($dbi->existsRelated($col))
 		{
 			$ri = $dbi->relateds[$col];
+			if (is_array($this->src))
+			{
+				$items = false;
+			} 
+			else
+			{
+				// Háže tam nesmyslnou podmínku a vrátí h*vno
+				//$items = $this->src->related($ri->relTableName, $ri->relColumn);
+				// Pomalejší ale funkční
+				$cn = $ri->relClass;
+				$pkCol = reset($dbi->primary)->columnName;
+				return $cn::findBy([$dbi->tableName.'Id' => $this->get($pkCol)]);
+			}
 			$sel = new DBSelect(
 				new DBRepository($ri->relClass),
-				$this->src->related($ri->relTableName, $ri->relColumn)
+				$items
 			);
 			return $sel;
 		}
@@ -71,6 +84,8 @@ class DBEntity extends \Nette\Object
 			{
 				$this->converted[$col] = $value;
 				if (!in_array($col, $this->modified)) $this->modified[] = $col;
+				if ($colDef->fkClass)
+					unset($this->converted[$colDef->propertyName]);
 			}
 		}
 		else 
@@ -141,7 +156,8 @@ class DBEntity extends \Nette\Object
 					$val = $val ? $val->_dbEntity->src : null;
 				}
 			} 
-			else 	$val = $this->src->$col;
+			else
+			$val = $this->src->$col;
 		}
 
 		/* $val = (!is_array($this->src) || array_key_exists($col, $this->src))

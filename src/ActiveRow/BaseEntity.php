@@ -31,9 +31,9 @@ class BaseEntity
 		$this->_dbEntity->save();
 	}
 	
-	public function toArray($cols = null, $fkObjects = false)
+	public function toArray($cols = null, $fkObjects = false, $prefix = '')
 	{
-		return $this->_dbEntity->toArray($cols, $fkObjects);
+		return $this->_dbEntity->toArray($cols, $fkObjects, $prefix);
 	}
 	
 	public static function get($pk, $db = null)

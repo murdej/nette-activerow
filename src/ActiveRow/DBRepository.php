@@ -57,7 +57,7 @@ class DBRepository extends \Nette\Object
 				$sel->where($k, $v);
 		}
 		$sel->limit(1);
-		// $sel->select('*');
+		$sel->select('*');
 		$row = $sel->fetch();
 		// dump($row);
 		if ($row == null) return null;
@@ -67,7 +67,7 @@ class DBRepository extends \Nette\Object
 
 	public function get($pk)
 	{
-		$dbr = $this->newTable()->get($pk);
+		$dbr = $this->newTable()->select('*')->get($pk);
 		return $dbr ? $this->createEntity($dbr) : null;
 	}
 	
@@ -93,7 +93,7 @@ class DBRepository extends \Nette\Object
 		return new DBSqlQuery($this, $this->db->query($query, ...$params)); 
 	}
 
-	public function nmRelSave($table, $keyName, $keyValue, $itemName, $itemValues)
+	public function nmRelSave($table, $keyName, $keyValue, $itemName, $itemValues, $op = 'both', $extraInsertData = [])
 	{
 		foreach ($itemValues as $i => $value) 
 		{
@@ -105,19 +105,24 @@ class DBRepository extends \Nette\Object
 			->fetchPairs(null, $itemName);
 		// Delete
 		$deleted = array_diff($curValues, $itemValues);
-		if ($deleted)
-			$this->db->table($table)
-				->where($keyName, $keyValue)
-				->where($itemName, $deleted)
-				->delete();
+		if ($deleted && $op != 'add')
+		{
+			$q = $this->db->table($table)
+				->where($keyName, $keyValue);
+			$itemCond = [$itemName => $deleted];
+			if (in_array(null, $deleted))
+				$itemCond[] = "$itemName IS NULL";
+			$q->whereOr($itemCond);
+			$q->delete();
+		}
 		$inserted = array_diff($itemValues, $curValues);
-		if ($inserted)
+		if ($inserted && $op != 'drop')
 		{
 			$data = [];
 			foreach($inserted as $item) $data[] = [
 				$keyName => $keyValue, 
 				$itemName => $item
-			];
+			] + $extraInsertData;
 			$this->db->query('INSERT INTO '.$table, $data);
 		}
 	} 

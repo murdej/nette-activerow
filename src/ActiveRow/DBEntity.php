@@ -43,7 +43,9 @@ class DBEntity extends \Nette\Object
 				// Pomalejší ale funkční
 				$cn = $ri->relClass;
 				$pkCol = reset($dbi->primary)->columnName;
-				return $cn::findBy([$dbi->tableName.'Id' => $this->get($pkCol)]);
+				return $cn::findBy([(
+					$ri->relColumn ?: $dbi->tableName.'Id'
+				) => $this->get($pkCol)]);
 			}
 			$sel = new DBSelect(
 				new DBRepository($ri->relClass),
@@ -63,7 +65,6 @@ class DBEntity extends \Nette\Object
 				$methodName = 'is' . $uname;
 				if ($reflexion->hasMethod($methodName)) break;
 				
-				dump($dbi);
 				throw new \Exception("Property $reflexion->name::$col is not defined.");
 			} while(false);
 			return $this->entity->$methodName();
@@ -94,7 +95,7 @@ class DBEntity extends \Nette\Object
 			$uname = ucfirst($col);
 			
 			$methodName = 'set' . $uname;
-			if (!$reflexion->getMethod($methodName)) throw new \Exception("Column $col is not defined.");
+			if (!$reflexion->hasMethod($methodName)) throw new \Exception("Column '$col' is not defined in class '".$dbi->className."'.");
 
 			$this->entity->$methodName($value);
 		}
@@ -139,6 +140,11 @@ class DBEntity extends \Nette\Object
 						$className = $colDef->fkClass; 
 						$val = $className::get($this->get($colDef->columnName));
 						$val = $val ? $val->_dbEntity->src : null;
+					} 
+					else if (!$colDef->nullable)
+					{
+						// Default hodnoty nenull primitivních typů
+						$val = Converter::get()->getDefaultOfType($colDef->type);
 					}
 				}
 			}
@@ -215,11 +221,14 @@ class DBEntity extends \Nette\Object
 		$this->callEvent('beforeSave');
 		if (is_array($this->src))
 		{
-			$this->callEvent('beforeInsert');
 			// Nový záznam
+			$this->callEvent('beforeInsert');
+			$insertData = $this->getModifiedDbData(true);
+			$tmp = $this->callEvent('insertData', $insertData);
+			if ($tmp !== null) $insertData = $tmp;
 			$this->src = DBRepository::getDatabase(null, $this->dbInfo)
 				->table($this->dbInfo->tableName)
-				->insert($this->getModifiedDbData(true));
+				->insert($insertData);
 			$this->converted = [];
 			$this->modified = [];
 			$this->callEvent('afterInsert');
@@ -237,17 +246,20 @@ class DBEntity extends \Nette\Object
 		$this->callEvent('afterSave');
 	}
 
-	protected function callEvent($event)
+	protected function callEvent($event, ...$params)
 	{
 		$dbi = $this->dbInfo;
+		$r = null;
 		if (isset($dbi->events[$event]))
 		{
 			$method = $dbi->events[$event];
-			$this->entity->$method($event);
+			$r = $this->entity->$method($event, ...$params);
 		}
+
+		return $r;
 	}
 	
-	public function toArray($cols = null, $fkObjects = false)
+	public function toArray($cols = null, $fkObjects = false, $prefix = '')
 	{
 		$dbi = $this->dbInfo;
 		if (!$cols) $cols = array_keys($dbi->columns);
@@ -256,7 +268,7 @@ class DBEntity extends \Nette\Object
 		{
 			$colDef = $dbi->columns[$col];
 			if (!$fkObjects && $colDef->fkClass && $col == $colDef->propertyName) continue;
-			$res[$col] = $this->get($col);
+			$res[$prefix.$col] = $this->get($col);
 		}
 		
 		return $res;

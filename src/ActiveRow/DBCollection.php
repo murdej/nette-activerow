@@ -2,6 +2,8 @@
 
 namespace  Murdej\ActiveRow;
 
+use Nette;
+
 class DBCollection extends \Nette\Object implements \Iterator, \ArrayAccess, \Countable
 {
 	public $selection;
@@ -74,14 +76,29 @@ class DBCollection extends \Nette\Object implements \Iterator, \ArrayAccess, \Co
 		$res = [];
 		foreach($this as $row)
 		{
-			if ($key)
+			/* if ($key)
 			{
 				$k = $row->$key;
 				$res[$k] = $value ? $row->$value : $row;
-			} else $res[] = $value ? $row->$value : $row;
+			} else $res[] = $value ? $row->$value : $row; */
+			if ($key)
+			{
+				$k = $this->getColValue($row, $key);
+				$res[$k] = $value ? $this->getColValue($row, $value) : $row;
+			} else $res[] = $value ? $this->getColValue($row, $value) : $row;
 		}
 
 		return $res;
+	}
+
+	protected function getColValue($row, $col)
+	{
+		if (is_string($col))
+			return $row->$col;
+		elseif (Nette\Utils\Callback::check($col)) 
+			return Nette\Utils\Callback::invoke($col, $row);
+		else
+			throw new \Exception('Column must be string or callable');
 	}
 
 	public function fetchField($field = 0)

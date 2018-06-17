@@ -52,8 +52,8 @@ class TableInfo
 		if (!isset($anns['property'])) throw new Exception("Must define any property");
 		foreach($anns['property'] as $pa)
 		{
-			$ci = new ColumnInfo($pa, $ns);
-			$ci->tableInfo = $this;
+			$ci = new ColumnInfo($pa, $ns, $this);
+			// $ci->tableInfo = $this;
 			$this->columns[$ci->propertyName] = $ci;
 			if ($ci->fkClass)
 			{

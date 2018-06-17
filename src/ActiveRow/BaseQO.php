@@ -14,29 +14,58 @@ abstract class BaseQO
 
 	public $mode = null;
 
+	public $countField = null;
+
 	public function __construct($repo)
 	{
 		$this->repo = $repo;
 	}
 
-	public function exec()
+	public function exec($mode = null)
 	{
-		if ($this->limitCount || $this->limitFrom)
+		if (!$mode)
 		{
-			$this->mode = 'count';
-			$q = $this->createQuery();
-			$this->prepareQuery($q);
-
-			$this->fullCount = $q->count();
+			if ($this->limitCount || $this->limitFrom)
+			{
+				$this->mode = 'count';
+				$q = $this->createQuery();
+				$this->prepareQuery($q);
+	
+				if ($this->countField)
+				{
+					$this->fullCount = $q->getSelection()->fetch()[$this->countField];
+				} 
+				else
+				{
+					$this->fullCount = $q->count();
+				}
+			}
 		}
 
-		$this->mode = 'data';
+		$this->mode = $mode ? $mode : 'data';
 		$q = $this->createQuery();
 		$this->prepareQuery($q);
 		if (method_exists($this, 'setupLimit')) $this->setupLimit($q);
 
 		return $q;
 	}
+
+	public function getRawRows($mode = null)
+	{
+		$res = [];
+		foreach($this->exec($mode)->selection as $row)
+		{
+			$res[] = $row;
+		}
+
+		return $res;
+	}
+
+	public function fromArray($arr)
+	{
+		foreach($arr as $k => $v)
+			$this->{$k} = $v;
+	}	
 
 	abstract protected function createQuery();
 

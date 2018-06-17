@@ -23,11 +23,17 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 		return $this;
 	}
 
+	protected $prepared = false;
+
 	public function getSelection()
 	{
-		$this->selection->select('`'.$this->repository->tableInfo->tableName.'`.*');
-		$order = $this->repository->tableInfo->defaultOrder;
-		if ($order) $this->order($order);
+		if (!$this->prepared)
+		{
+			$this->selection->select('`'.$this->repository->tableInfo->tableName.'`.*');
+			$order = $this->repository->tableInfo->defaultOrder;
+			if ($order) $this->order($order);
+			$this->prepared = true;
+		}
 		
 		return $this->selection;
 	}
@@ -51,6 +57,7 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 	public function whereOr(...$args)
 	{
 		$this->selection->whereOr(...$args);
+		return $this;
 		/*$args = func_get_args();
 		if (count($args) == 1 && is_array($args[0]))
 		{

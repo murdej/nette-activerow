@@ -62,7 +62,7 @@ class ColumnInfo extends \Nette\Object
 				$this->typeLen = trim($m[3]) ? (int)$m[3] : null;
 				$this->typeDec = strlen(trim($m[4])) > 1 ? (int)substr($m[4], 1) : null;
 				$this->defaultValue = strlen(trim($m[5])) > 1 ? substr($m[5], 1) : null;
-				$flagAlias = [ '?' => 'nullable' ];
+				$flagAlias = [ '?' => 'nullable', 'pk' => 'primary' ];
 				foreach(explode(',', $m[7]) as $flag)
 				{
 					$flag = trim($flag);
@@ -91,12 +91,12 @@ class ColumnInfo extends \Nette\Object
 								$this->columnName = $this->propertyName.'Id';
 								break;
 							default:
-								throw new \Exception("Invalid column flag '$flag'");
+								throw new \Exception("Invalid column flag '$flag', property '$this->propertyInfo'");
 								break;
 						}
 					}
 				}
-			} else throw new \Exception("Invalid column def '$ann'");
+			} else throw new \Exception("Invalid column def '$ann', property '$this->propertyInfo'");
 		} else {
 			foreach($ann as $k => $v) 
 			{
@@ -108,9 +108,15 @@ class ColumnInfo extends \Nette\Object
 			}
 		}
 	}
-	
-	public function __construct($ann, $ns)
+
+	public function getPropertyInfo()
 	{
+		return $this->tableInfo->className."::".$this->propertyName;
+	}
+	
+	public function __construct($ann, $ns, $tableInfo)
+	{
+		$this->tableInfo = $tableInfo;
 		$this->parseAnnotation($ann, $ns);
 	}
 	

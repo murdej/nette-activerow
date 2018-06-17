@@ -48,7 +48,7 @@ class Converter
 				case 'float':
 					return (float)$value;
 				case 'json':
-					return json_decode($value, true);
+					return is_array($value) ? $value : json_decode($value, true);
 				case 'string':
 					return (string)$value;
 				case 'bool':
@@ -106,6 +106,23 @@ class Converter
 					return $value === '' ? null : (int)$value;
 			}
 			return $value;
+		}
+	}
+	
+	public function getDefaultOfType($type)
+	{
+		switch($type)
+		{
+			case 'int':
+				return 0;
+			case 'decimal':
+			case 'double':
+			case 'float':
+				return 0.0;
+			case 'string':
+				return '';
+			case 'bool':
+				return false;
 		}
 	}
 }

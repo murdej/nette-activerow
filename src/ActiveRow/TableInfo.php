@@ -1,6 +1,6 @@
 <?php
 
-namespace  Murdej\ActiveRow;
+namespace Murdej\ActiveRow;
 
 class TableInfo
 {

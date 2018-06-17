@@ -1,0 +1,20 @@
+{
+	"name": "murdej/nette-activerow",
+	"description": "Active record for nette database",
+	"keywords": ["nette", "active row"],
+	"license": ["GPL-3.0"],
+	"require": {
+		"php": ">= 7.1",
+		"nette/reflection": "^2.4",
+		"nette/database": "^2.4"
+	},
+	"minimum-stability": "stable",
+	"config": {
+			"platform": {
+					"php": "7.1"
+			}
+	},
+	"autoload": {
+		"classmap": ["src/"]
+	}
+}

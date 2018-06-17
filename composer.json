@@ -1,6 +1,6 @@
 {
 	"name": "murdej/nette-activerow",
-	"description": "Active record for nette database",
+	"description": "Active record for nette database.",
 	"keywords": ["nette", "active row"],
 	"license": ["GPL-3.0"],
 	"require": {

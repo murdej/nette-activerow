@@ -62,6 +62,35 @@ class ColumnInfo extends \Nette\Object
 				$this->typeLen = trim($m[3]) ? (int)$m[3] : null;
 				$this->typeDec = strlen(trim($m[4])) > 1 ? (int)substr($m[4], 1) : null;
 				$this->defaultValue = strlen(trim($m[5])) > 1 ? substr($m[5], 1) : null;
+				if ($this->defaultValue)
+				{
+					switch($this->type)
+					{
+						case 'json':
+							switch($this->defaultValue)
+							{
+								case 'n':
+									$this->defaultValue = null;
+									break;
+								case 'l':
+									$this->defaultValue = [];
+									break;
+								case 'd':
+									$this->defaultValue = [];
+									break;
+								case 't':
+									$this->defaultValue = true;
+									break;
+								case 'f':
+									$this->defaultValue = false;
+									break;
+								default:
+									$this->defaultValue = json_decode($this->defaultValue, true);
+									break;
+							}
+							break;
+					}
+				}
 				$flagAlias = [ '?' => 'nullable', 'pk' => 'primary' ];
 				foreach(explode(',', $m[7]) as $flag)
 				{

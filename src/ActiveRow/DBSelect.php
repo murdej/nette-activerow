@@ -54,6 +54,12 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 		return $this;
 	}
 
+	public function group(...$params)
+	{
+		$this->selection->group(...$params);
+		return $this;
+	}
+
 	public function whereOr(...$args)
 	{
 		$this->selection->whereOr(...$args);

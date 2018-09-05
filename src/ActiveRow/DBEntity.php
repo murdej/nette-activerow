@@ -16,6 +16,8 @@ class DBEntity extends \Nette\Object
 	public $converted = array();
 	
 	public $defaults = [];
+
+	public $collection = null;
 	
 	public function get($col)
 	{
@@ -152,6 +154,7 @@ class DBEntity extends \Nette\Object
 		else 
 		{
 			if (!isset($this->src[$col]))
+			// if (!isset($this->src->$col))
 			{
 				$colDef = $this->getDbInfo()->columns[$col];
 				// Volání FKO na view

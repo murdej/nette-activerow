@@ -41,9 +41,9 @@ class DBRepository extends \Nette\Object
 		return TableInfo::get($this->className);
 	}
 	
-	public function newTable()
+	public function newTable($tableName = null)
 	{
-		return $this->getDb()->table($this->tableInfo->tableName);
+		return $this->getDb()->table($tableName ?: $this->tableInfo->tableName);
 	}
 	
 	public function getBy($params)
@@ -93,22 +93,39 @@ class DBRepository extends \Nette\Object
 		return new DBSqlQuery($this, $this->db->query($query, ...$params)); 
 	}
 
-	public function nmRelSave($table, $keyName, $keyValue, $itemName, $itemValues, $op = 'both', $extraInsertData = [])
+	public function nmRelSave(string $table, $keyName, $keyValue, string $itemName, $itemValues, string $op = 'both', array $extraInsertData = []) : array
 	{
+		$res = ['inserted' => [], 'deleted' => []];
+		$keyWhere = function($q) use ($keyName, $keyValue)
+		{
+			if (is_array($keyName))
+			{
+				foreach($keyName as $k => $v)
+					$q->where($k, $v);
+			} 
+			else
+			{
+				$q->where($keyName, $keyValue);
+			}	
+		};
+
 		foreach ($itemValues as $i => $value) 
 		{
 			if ($value == '') $itemValues[$i] = null;
 		}
-		$curValues = $this->db->table($table)
-			->select($itemName)
-			->where($keyName, $keyValue)
-			->fetchPairs(null, $itemName);
+		$q = $this->db->table($table)
+			->select($itemName);
+		
+		$keyWhere($q);
+
+		$curValues = $q->fetchPairs(null, $itemName);
 		// Delete
 		$deleted = array_diff($curValues, $itemValues);
 		if ($deleted && $op != 'add')
 		{
-			$q = $this->db->table($table)
-				->where($keyName, $keyValue);
+			$res['deleted'] = $deleted;
+			$q = $this->db->table($table);
+			$keyWhere($q);
 			$itemCond = [$itemName => $deleted];
 			if (in_array(null, $deleted))
 				$itemCond[] = "$itemName IS NULL";
@@ -118,20 +135,44 @@ class DBRepository extends \Nette\Object
 		$inserted = array_diff($itemValues, $curValues);
 		if ($inserted && $op != 'drop')
 		{
+			$res['inserted'] = $inserted;
 			$data = [];
-			foreach($inserted as $item) $data[] = [
-				$keyName => $keyValue, 
-				$itemName => $item
-			] + $extraInsertData;
+			foreach($inserted as $item)
+			{
+				$rowData = [
+					$itemName => $item
+				] + $extraInsertData;
+
+				if (is_array($keyName))
+				{
+					$rowData += $keyName;
+				}
+				else
+				{
+					$rowData[$keyName] = $keyValue;
+				}
+				$data[] = $rowData;
+			} 
 			$this->db->query('INSERT INTO '.$table, $data);
 		}
+
+		return $res;
 	} 
 
 	public function nmRelLoad($table, $keyName, $keyValue, $itemName)
 	{
-		return $this->db->table($table)
-			->select($itemName)
-			->where($keyName, $keyValue)
-			->fetchPairs(null, $itemName);
+		$q = $this->db->table($table)->select($itemName);
+		
+		if (is_array($keyName))
+		{
+			foreach($keyName as $k => $v)
+				$q->where($k, $v);
+		} 
+		else
+		{
+			$q->where($keyName, $keyValue);
+		}	
+
+		return $q->fetchPairs(null, $itemName);
 	} 
 }

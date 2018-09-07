@@ -74,6 +74,22 @@ class DBEntity extends \Nette\Object
 		
 	}
 	
+	public function isset($col)
+	{
+		$dbi = $this->getDbInfo();
+		if ($dbi->existsCol($col) || $dbi->existsRelated($col)) return true;
+		
+		$reflexion = new ClassType(get_class($this->entity));
+		$uname = ucfirst($col);
+		$methodName = 'get' . $uname;
+		if ($reflexion->hasMethod($methodName)) return true;
+
+		$methodName = 'is' . $uname;
+		if ($reflexion->hasMethod($methodName)) return true;
+
+		return false;
+	}
+	
 	public function set($col, $value)
 	{
 		$dbi = $this->getDbInfo();

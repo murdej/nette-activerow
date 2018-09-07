@@ -15,6 +15,11 @@ class BaseEntity
 	{
 		$this->_dbEntity->set($key, $value);
 	}
+
+	public function __isset($key)
+	{
+		return $this->_dbEntity->isset($key);
+	}
 	
 	public function __construct($src = [], $db = null)
 	{

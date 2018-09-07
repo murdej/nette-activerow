@@ -73,8 +73,7 @@ class ColumnInfo extends \Nette\Object
 									$this->defaultValue = null;
 									break;
 								case 'l':
-									$this->defaultValue = [];
-									break;
+								case 'a':
 								case 'd':
 									$this->defaultValue = [];
 									break;

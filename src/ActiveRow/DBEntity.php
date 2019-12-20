@@ -4,7 +4,7 @@ namespace  Murdej\ActiveRow;
 
 use Nette\Reflection\ClassType;
 
-class DBEntity extends \Nette\Object
+class DBEntity extends \Nette\NObject
 {
 
 	public $src;

@@ -3,9 +3,15 @@
 namespace  Murdej\ActiveRow;
 
 use \Murdej\ActiveRow\TableInfo;
+use Nette\SmartObject;
 
-class RelatedInfo extends \Nette\Object
+/**
+ * @property string $relTableName
+ */
+class RelatedInfo // extends \Nette\Object
 {
+	use SmartObject;
+
 	public $relClass = null;
 	
 	public $relColumn = null;

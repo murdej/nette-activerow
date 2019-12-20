@@ -2,8 +2,16 @@
 
 namespace  Murdej\ActiveRow;
 
-class ColumnInfo extends \Nette\Object
+use Nette\SmartObject;
+
+/**
+ * @property string $fullName
+ * @property string $propertyInfo
+ */
+class ColumnInfo // extends \Nette\Object
 {
+	use SmartObject;
+
 	public $columnName;
 	
 	public $propertyName;
@@ -50,11 +58,16 @@ class ColumnInfo extends \Nette\Object
 	{
 		// dump($ann);
 		if (is_string($ann)) {
-			if (preg_match('/^([\\\\A-Za-z_][\\\\0-9A-Za-z_]*)(\\[([0-9]*)(,[0-9]*)?(,[^\\]]*)?\\])? *(\\(([!\\?A-Za-z_0-9,]*)\\))? \\$([A-Za-z_][0-9A-Za-z_]*)$/', $ann, $m))
+			if (preg_match('/^([\\\\?A-Za-z_][\\\\0-9A-Za-z_]*)(\\[([0-9]*)(,[0-9]*)?(,[^\\]]*)?\\])? *(\\(([!\\?A-Za-z_0-9,]*)\\))? \\$([A-Za-z_][0-9A-Za-z_]*)$/', $ann, $m))
 			{
 				// dump($m);
 				$this->propertyName = $this->columnName = trim($m[8]);
 				$this->type = trim($m[1]);
+				if ($this->type[0] == '?')
+				{
+					$this->type = substr($this->type, 1);
+					$this->nullable = true;
+				}
 				if ($this->type == 'autoIncrement')
 				{
 					Convention::autoIncrement($this);

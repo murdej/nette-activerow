@@ -3,9 +3,12 @@
 namespace  Murdej\ActiveRow;
 
 use Nette;
+use Nette\SmartObject;
 
-class DBCollection extends \Nette\Object implements \Iterator, \ArrayAccess, \Countable
+class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess, \Countable
 {
+	use SmartObject;
+
 	public $selection;
 
 	public $repository;

@@ -45,9 +45,10 @@ class DBSqlQuery extends DBCollection
 		return $this;
 	}	
 	
-	public function code($code)
+	public function code($code, ...$vars)
 	{
 		$this->query .= $code;
+		$this->vars = array_merge($this->vars, $vars);
 		return $this;
 	}
 	
@@ -58,7 +59,7 @@ class DBSqlQuery extends DBCollection
 		return $this;
 	}
 	
-	public function c($code) { return $this->code($code); }
+	public function c($code, ...$vars) { return $this->code($code, ...$vars); }
 	
 	public function i($code) { return $this->identifier($code); }
 

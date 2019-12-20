@@ -111,4 +111,16 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 	{
 		return $this->seletion;
 	}
+
+	public function alias(...$args) : DBSelect
+	{
+		$this->selection->alias(...$args);
+		return $this;
+	}
+
+	public function joinWhere(...$args) : DBSelect
+	{
+		$this->selection->joinWhere(...$args);
+		return $this;
+	}
 }

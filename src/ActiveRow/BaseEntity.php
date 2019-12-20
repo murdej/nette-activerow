@@ -4,6 +4,13 @@ namespace  Murdej\ActiveRow;
 
 class BaseEntity 
 {
+	use TBaseEntity;
+
+	use TStaticRepository;
+}
+
+trait TBaseEntity
+{
 	public $_dbEntity;
 	
 	public function __get($key)
@@ -40,35 +47,12 @@ class BaseEntity
 	{
 		return $this->_dbEntity->toArray($cols, $fkObjects, $prefix);
 	}
-	
-	public static function get($pk, $db = null)
-	{
-		return self::repository($db)->get($pk, $db);
-	}
-	
-	public static function getBy($filter, $db = null)
-	{
-		return self::repository($db)->getBy($filter);
-	}
-	
-	public static function findBy($filter, $db = null)
-	{
-		return self::repository($db)->newSelect()->where($filter);
-	}
 
-	public static function findAll($db = null)
-	{
-		return self::repository($db)->newSelect();
-	}
-	
 	/**
-	@return Murdej\ActiveRow\DBRepository
-	**/
-	public static function repository($db = null)
-	{
-		return new DBRepository(get_called_class(), $db);
-	}
-
+	 * @param []|\ArrayAccess $values
+	 * @param []|null $cols
+	 * @param []|null $ignoreCols
+	 */
 	public function fromArray($values, $cols = null, $ignoreCols = ['id'])
 	{
 		$columnNames = $this->_dbEntity->getDbInfo()->getColumnNames();
@@ -80,5 +64,48 @@ class BaseEntity
 					&& ($ignoreCols === null || !in_array($key, $ignoreCols))
 			) $this->$key = $value;
 		}
+	}
+}
+
+trait TStaticRepository
+{
+	/** @return ?static */
+	public static function get($pk, $db = null)
+	{
+		return self::repository($db)->get($pk, $db);
+	}
+
+	/** @return static */
+	public static function createNew($data, $db = null)
+	{
+		$ent = new static();
+		$ent->fromArray($data);
+		return $ent;
+	}
+
+	/** @return ?static */
+	public static function getBy($filter, $db = null)
+	{
+		return self::repository($db)->getBy($filter);
+	}
+	
+	/** @return static[]|DBSelect */
+	public static function findBy($filter, $db = null)
+	{
+		return self::repository($db)->newSelect()->where($filter);
+	}
+
+	/** @return static[]|DBSelect */
+	public static function findAll($db = null)
+	{
+		return self::repository($db)->newSelect();
+	}
+	
+	/**
+	@return Murdej\ActiveRow\DBRepository
+	**/
+	public static function repository($db = null) : DBRepository
+	{
+		return new DBRepository(get_called_class(), $db);
 	}
 }

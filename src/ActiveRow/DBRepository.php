@@ -2,8 +2,15 @@
 
 namespace  Murdej\ActiveRow;
 
-class DBRepository extends \Nette\Object
+use Nette\SmartObject;
+
+/**
+ * @property TableInfo $tableInfo
+ */
+class DBRepository extends \Nette\NObject
 {
+	// use SmartObject;
+
 	/** @var Nette\Database\Context */
 	public $database = null;
 	
@@ -36,14 +43,19 @@ class DBRepository extends \Nette\Object
 		else throw new \Exception("\$database is not instance of Nette\Database\Context.");
 	}
 	
-	public function getTableInfo()
+	public function getTableInfo() : TableInfo
 	{
 		return TableInfo::get($this->className);
 	}
 	
 	public function newTable($tableName = null)
 	{
-		return $this->getDb()->table($tableName ?: $this->tableInfo->tableName);
+		if (!$tableName)
+		{
+			$tableInfo = $this->tableInfo;
+			$tableName = $tableInfo->tableName;
+		} 
+		return $this->getDb()->table($tableName);
 	}
 	
 	public function getBy($params)
@@ -57,7 +69,7 @@ class DBRepository extends \Nette\Object
 				$sel->where($k, $v);
 		}
 		$sel->limit(1);
-		$sel->select('*');
+		$sel->select('`'.$this->tableInfo->tableName.'`.*');
 		$row = $sel->fetch();
 		// dump($row);
 		if ($row == null) return null;
@@ -83,7 +95,7 @@ class DBRepository extends \Nette\Object
 		return new DBSelect($this);
 	}
 
-	public function newSqlQuery()
+	public function newSqlQuery() : DBSqlQuery
 	{
 		return new DBSqlQuery($this);
 	}
@@ -108,7 +120,7 @@ class DBRepository extends \Nette\Object
 				$q->where($keyName, $keyValue);
 			}	
 		};
-
+		
 		foreach ($itemValues as $i => $value) 
 		{
 			if ($value == '') $itemValues[$i] = null;
@@ -120,7 +132,7 @@ class DBRepository extends \Nette\Object
 
 		$curValues = $q->fetchPairs(null, $itemName);
 		// Delete
-		$deleted = array_diff($curValues, $itemValues);
+		$deleted = array_unique(array_diff($curValues, $itemValues));
 		if ($deleted && $op != 'add')
 		{
 			$res['deleted'] = $deleted;
@@ -132,7 +144,7 @@ class DBRepository extends \Nette\Object
 			$q->whereOr($itemCond);
 			$q->delete();
 		}
-		$inserted = array_diff($itemValues, $curValues);
+		$inserted = array_unique(array_diff($itemValues, $curValues));
 		if ($inserted && $op != 'drop')
 		{
 			$res['inserted'] = $inserted;

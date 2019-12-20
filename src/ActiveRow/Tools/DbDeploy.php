@@ -43,6 +43,9 @@ class DbDeploy
 		}
 	}
 
+	/**
+	 * @param TableInfo[] $tis
+	 */
 	public function createTables(array $tis) : string
 	{
 		$sqlParts = [];
@@ -51,7 +54,7 @@ class DbDeploy
 			$this->createTable($ti, $sqlParts);
 		}
 		$sql = '';
-		dump($sqlParts);
+		// dump($sqlParts);
 		ksort($sqlParts);
 		foreach($sqlParts as $sqlPart)
 		{
@@ -71,8 +74,9 @@ class DbDeploy
 		if ($column->autoIncrement)
 		{
 			$line[] = 'AUTO_INCREMENT PRIMARY KEY';
-		} 
+		}
 		if ($column->unique) $line[] = 'UNIQUE KEY';
+		if ($column->primary) $line[] = 'PRIMARY KEY';
 		if (isset($t[1])) $line[] = $t[1];
 
 		$sqlParts[self::OrderCol][] = implode(' ', $line);

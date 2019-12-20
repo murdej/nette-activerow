@@ -103,7 +103,7 @@ class TableInfo
 
 	protected static $dbInfoCache = [];
 	
-	public static function get($className)
+	public static function get($className) : TableInfo
 	{
 		if (!isset(self::$dbInfoCache[$className]))
 		{
@@ -112,6 +112,7 @@ class TableInfo
 		
 		return self::$dbInfoCache[$className];
 	}
+	
 	public static function getFullClassName($className, $nameSpace)
 	{
 		return (strpos($className, '\\') == false) 

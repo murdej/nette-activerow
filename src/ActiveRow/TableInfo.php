@@ -40,7 +40,7 @@ class TableInfo
 			{
 				$this->tableName = Convention::deriveTableNameFromClass($ns, $scn);
 			}
-			else throw new Exception("Invalid table def $anns[dbTable][0]");
+			else throw new \Exception("Invalid table def $anns[dbTable][0]");
 		}
 		// Výchzí hodnoty
 		if (isset($anns['defaultValues']))
@@ -49,7 +49,7 @@ class TableInfo
 			$this->defaults = $cn::defaultValues();
 		}
 		
-		if (!isset($anns['property'])) throw new Exception("Must define any property");
+		if (!isset($anns['property'])) throw new \Exception("Must define any property");
 		foreach($anns['property'] as $pa)
 		{
 			$ci = new ColumnInfo($pa, $ns, $this);

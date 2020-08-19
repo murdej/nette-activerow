@@ -58,11 +58,26 @@ class ColumnInfo // extends \Nette\Object
 	{
 		// dump($ann);
 		if (is_string($ann)) {
-			if (preg_match('/^([\\\\?A-Za-z_][\\\\0-9A-Za-z_]*)(\\[([0-9]*)(,[0-9]*)?(,[^\\]]*)?\\])? *(\\(([!\\?A-Za-z_0-9,]*)\\))? \\$([A-Za-z_][0-9A-Za-z_]*)$/', $ann, $m))
+			$m1 = null;
+			$m2 = null;
+			if (
+				preg_match('/^([\\\\?A-Za-z_][\\\\0-9A-Za-z_]*)(\\[([0-9]*)(,[0-9]*)?(,[^\\]]*)?\\])? *(\\(([!\\?A-Za-z_0-9,]*)\\))? \\$([A-Za-z_][0-9A-Za-z_]*)$/', $ann, $m1)
+				|| preg_match('/^([\\\\?A-Za-z_][\\\\0-9A-Za-z_]*) \\$([A-Za-z_][0-9A-Za-z_]*) *(\\[([0-9]*)(,[0-9]*)?(,[^\\]]*)?\\])? *(\\(([!\\?A-Za-z_0-9,]*)\\))?$/', $ann, $m2)
+				)
 			{
+				if ($m1)
+				{
+					//0, 1,     2,  3,        4,        5,             6,  7       8
+					[$_, $type, $_, $typeLen, $typeDec, $defaultValue, $_, $flags, $propertyName] = $m1 + [null, null, null, null, null, null, null, null, null];
+				} 
+				else if ($m2) 
+				{
+					//0, 1,     2,             3,  4,        5,        6,             7   8
+					[$_, $type, $propertyName, $_, $typeLen, $typeDec, $defaultValue, $_, $flags] = $m2 + [null, null, null, null, null, null, null, null, null];
+				}
 				// dump($m);
-				$this->propertyName = $this->columnName = trim($m[8]);
-				$this->type = trim($m[1]);
+				$this->propertyName = $this->columnName = trim($propertyName);
+				$this->type = trim($type);
 				if ($this->type[0] == '?')
 				{
 					$this->type = substr($this->type, 1);
@@ -72,9 +87,9 @@ class ColumnInfo // extends \Nette\Object
 				{
 					Convention::autoIncrement($this);
 				}
-				$this->typeLen = trim($m[3]) ? (int)$m[3] : null;
-				$this->typeDec = strlen(trim($m[4])) > 1 ? (int)substr($m[4], 1) : null;
-				$this->defaultValue = strlen(trim($m[5])) > 1 ? substr($m[5], 1) : null;
+				$this->typeLen = trim($typeLen) ? (int)$typeLen : null;
+				$this->typeDec = strlen(trim($typeDec)) > 1 ? (int)substr($typeDec, 1) : null;
+				$this->defaultValue = strlen(trim($defaultValue)) > 1 ? substr($defaultValue, 1) : null;
 				if ($this->defaultValue)
 				{
 					switch($this->type)
@@ -104,7 +119,7 @@ class ColumnInfo // extends \Nette\Object
 					}
 				}
 				$flagAlias = [ '?' => 'nullable', 'pk' => 'primary' ];
-				foreach(explode(',', $m[7]) as $flag)
+				foreach(explode(',', $flags) as $flag)
 				{
 					$flag = trim($flag);
 					if (isset($flagAlias[$flag])) $flag = $flagAlias[$flag];

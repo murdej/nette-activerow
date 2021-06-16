@@ -99,17 +99,17 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 		return call_user_func_array([$this->selection, 'max'], func_get_args());
 	}
 
-	public function toArray()
+	/* public function toArray()
 	{
 		$res = [];
 		foreach($this as $i => $el) $res[$i] = $el;
 		
 		return $res;
-	}
+	} */
 	
 	public function getAsRows()
 	{
-		return $this->seletion;
+		return $this->selection;
 	}
 
 	public function alias(...$args) : DBSelect

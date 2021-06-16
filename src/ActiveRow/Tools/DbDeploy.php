@@ -28,6 +28,7 @@ class DbDeploy
 			if ($k == $column->columnName)
 				$this->createColumn($column, $tableSqlParts);
 		}
+		if (!$ti->tableName) throw new \Exception("No tableName for ".$ti->className);
 		$sql = 'CREATE TABLE '.$this->escapeName($ti->tableName)." ($nl";
 		$sql .= implode(",$nl", $tableSqlParts[self::OrderCol]);
 		$sql .= "$nl)";
@@ -123,6 +124,7 @@ class DbDeploy
 				$ch = "CHECK($escCN IN (1, 0))";
 				break;
 			case 'DateTime':
+			case '\\DateTime':
 				$t = 'DATETIME';
 				break;
 			default:

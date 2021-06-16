@@ -2,9 +2,12 @@
 
 namespace  Murdej\ActiveRow;
 
+use App\Repositories\DBRepos;
 use Nette\SmartObject;
+use PHPStan\Type\CallableType;
 
 /**
+ * @template T
  * @property TableInfo $tableInfo
  */
 class DBRepository extends \Nette\NObject
@@ -15,13 +18,20 @@ class DBRepository extends \Nette\NObject
 	public $database = null;
 	
 	public $className = null;
-	
+
+	/**
+	 * @param class-string<T> $cn
+	 * @param DBRepos|null $db
+	 */
 	function __construct($cn, $db = null)
 	{
 		$this->className = $cn;
 		$this->database = $db;
 	}
-	
+
+	/**
+	 * @var callable
+	 */
 	public static $databaseCreator = null;
 	
 	public function getDb()
@@ -47,7 +57,11 @@ class DBRepository extends \Nette\NObject
 	{
 		return TableInfo::get($this->className);
 	}
-	
+
+	/**
+	 * @param null $tableName
+	 * @return mixed
+	 */
 	public function newTable($tableName = null)
 	{
 		if (!$tableName)
@@ -57,7 +71,11 @@ class DBRepository extends \Nette\NObject
 		} 
 		return $this->getDb()->table($tableName);
 	}
-	
+
+	/**
+	 * @param array $params
+	 * @return T|null
+	 */
 	public function getBy($params)
 	{
 		$sel = $this->newTable();
@@ -77,12 +95,20 @@ class DBRepository extends \Nette\NObject
 		return $this->createEntity($row);
 	}
 
+	/**
+	 * @param $pk
+	 * @return T|null
+	 */
 	public function get($pk)
 	{
 		$dbr = $this->newTable()->select('*')->get($pk);
 		return $dbr ? $this->createEntity($dbr) : null;
 	}
-	
+
+	/**
+	 * @param $row
+	 * @return T
+	 */
 	public function createEntity($row)
 	{
 		$className = $this->className;
@@ -90,16 +116,37 @@ class DBRepository extends \Nette\NObject
 		return new $className($row, $this->database);
 	}
 
+	/**
+	 * @return T
+	 */
+	public function newEntity()
+	{
+		$className = $this->className;
+
+		return new $className([], $this->database);
+	}
+
+	/**
+	 * @return DBSelect
+	 */
 	public function newSelect()
 	{
 		return new DBSelect($this);
 	}
 
+	/**
+	 * @return DBSqlQuery
+	 */
 	public function newSqlQuery() : DBSqlQuery
 	{
 		return new DBSqlQuery($this);
 	}
 
+	/**
+	 * @param $query
+	 * @param ...$params
+	 * @return DBSqlQuery
+	 */
 	public function query($query, ...$params)
 	{
 		return new DBSqlQuery($this, $this->db->query($query, ...$params)); 

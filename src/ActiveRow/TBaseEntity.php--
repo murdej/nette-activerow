@@ -1,14 +1,6 @@
 <?php
 
-namespace  Murdej\ActiveRow;
-
-class BaseEntity implements \JsonSerializable
-{
-	use TBaseEntity;
-
-	use TStaticRepository;
-
-}
+namespace Murdej\ActiveRow;
 
 trait TBaseEntity
 {
@@ -70,48 +62,5 @@ trait TBaseEntity
 	public function jsonSerialize()
 	{
 		return $this->toArray();
-	}
-}
-
-trait TStaticRepository
-{
-	/** @return ?static */
-	public static function get($pk, $db = null)
-	{
-		return self::repository($db)->get($pk, $db);
-	}
-
-	/** @return static */
-	public static function createNew($data, $db = null)
-	{
-		$ent = new static();
-		$ent->fromArray($data);
-		return $ent;
-	}
-
-	/** @return ?static */
-	public static function getBy($filter, $db = null)
-	{
-		return self::repository($db)->getBy($filter);
-	}
-
-	/** @return static[]|DBSelect */
-	public static function findBy($filter, $db = null)
-	{
-		return self::repository($db)->newSelect()->where($filter);
-	}
-
-	/** @return static[]|DBSelect */
-	public static function findAll($db = null)
-	{
-		return self::repository($db)->newSelect();
-	}
-
-	/**
-	@return libs\ActiveRow\DBRepository
-	 **/
-	public static function repository($db = null) : DBRepository
-	{
-		return new DBRepository(get_called_class(), $db);
 	}
 }

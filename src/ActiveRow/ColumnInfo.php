@@ -76,6 +76,9 @@ class ColumnInfo // extends \Nette\Object
 					[$_, $type, $propertyName, $_, $typeLen, $typeDec, $defaultValue, $_, $flags] = $m2 + [null, null, null, null, null, null, null, null, null];
 				}
 				// dump($m);
+				$flagList = explode(',', $flags);
+				if (in_array("autoIncrement", $flagList)) $type = "autoIncrement";
+				if (in_array("json", $flagList)) $type = "json";
 				$this->propertyName = $this->columnName = trim($propertyName);
 				$this->type = trim($type);
 				if ($this->type[0] == '?')
@@ -118,8 +121,8 @@ class ColumnInfo // extends \Nette\Object
 							break;
 					}
 				}
-				$flagAlias = [ '?' => 'nullable', 'pk' => 'primary' ];
-				foreach(explode(',', $flags) as $flag)
+				$flagAlias = [ '?' => 'nullable', 'pk' => 'primary', "index" => "indexed" ];
+				foreach($flagList as $flag)
 				{
 					$flag = trim($flag);
 					if (isset($flagAlias[$flag])) $flag = $flagAlias[$flag];
@@ -145,6 +148,9 @@ class ColumnInfo // extends \Nette\Object
 								//todo: detekovat podle PK druhé tabulky
 								$this->type = 'int';
 								$this->columnName = $this->propertyName.'Id';
+								break;
+							case "autoincrement": // pseudotypes
+							case "json":
 								break;
 							default:
 								throw new \Exception("Invalid column flag '$flag', property '$this->propertyInfo'");

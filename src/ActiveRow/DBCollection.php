@@ -5,7 +5,7 @@ namespace  Murdej\ActiveRow;
 use Nette;
 use Nette\SmartObject;
 
-class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess, \Countable
+class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess, \Countable, \JsonSerializable
 {
 	use SmartObject;
 
@@ -94,6 +94,19 @@ class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess,
 		return $res;
 	}
 
+	public function fetchRawArray(bool $rowIsArray = false) : array
+	{
+		$res = [];
+		foreach($this->getSelection() as $row)
+		{
+			/* $arow = [];
+			if ($row) */
+			$res[] = $row/*->toArray()*/;
+		}
+
+		return $res;
+	}
+
 	protected function getColValue($row, $col)
 	{
 		if (is_string($col))
@@ -104,8 +117,22 @@ class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess,
 			throw new \Exception('Column must be string or callable');
 	}
 
-	public function fetchField($field = 0)
+	public function fetchField($field = null)
 	{
-		return $this->getSelection()->fetchField($field);
+		return $field 
+			? $this->getSelection()->fetchField($field)
+			: $this->getSelection()->fetchField();
+	}
+
+	public function toArray() : array
+	{
+		$res = [];
+		foreach ($this as $item) $res[] = $item;
+		return $res;
+	}
+
+	public function jsonSerialize()
+	{
+		return $this->toArray();
 	}
 }

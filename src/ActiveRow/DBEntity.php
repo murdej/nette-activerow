@@ -18,6 +18,8 @@ class DBEntity extends \Nette\NObject
 	public $defaults = [];
 
 	public $collection = null;
+
+	public $db = null;
 	
 	public function get($col)
 	{
@@ -45,6 +47,7 @@ class DBEntity extends \Nette\NObject
 				// Pomalejší ale funkční
 				$cn = $ri->relClass;
 				$pkCol = reset($dbi->primary)->columnName;
+				if (!$pkCol) throw new \Exception("Entity '$dbi->className' has not primary column.");
 				return $cn::findBy([(
 					$ri->relColumn ?: $dbi->tableName.'Id'
 				) => $this->get($pkCol)]);
@@ -122,7 +125,7 @@ class DBEntity extends \Nette\NObject
 	
 	public function getDb()
 	{
-		return DBRepository::getDatabase($this->database);
+		return $this->db ?: DBRepository::getDatabase($this->database);
 	}
 	
 	public function getDbInfo($className = null) 
@@ -245,7 +248,7 @@ class DBEntity extends \Nette\NObject
 			$insertData = $this->getModifiedDbData(true);
 			$tmp = $this->callEvent('insertData', $insertData);
 			if ($tmp !== null) $insertData = $tmp;
-			$this->src = DBRepository::getDatabase(null, $this->dbInfo)
+			$this->src = DBRepository::getDatabase($this->db, $this->dbInfo)
 				->table($this->dbInfo->tableName)
 				->insert($insertData);
 			$this->converted = [];

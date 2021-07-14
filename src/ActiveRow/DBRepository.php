@@ -3,6 +3,7 @@
 namespace  Murdej\ActiveRow;
 
 use App\Repositories\DBRepos;
+use Nette\Database\Explorer;
 use Nette\SmartObject;
 use PHPStan\Type\CallableType;
 
@@ -21,7 +22,7 @@ class DBRepository extends \Nette\NObject
 
 	/**
 	 * @param class-string<T> $cn
-	 * @param DBRepos|null $db
+	 * @param Explorer|null $db
 	 */
 	function __construct($cn, $db = null)
 	{
@@ -106,10 +107,10 @@ class DBRepository extends \Nette\NObject
 	}
 
 	/**
-	 * @param $row
+	 * @param array $row
 	 * @return T
 	 */
-	public function createEntity($row)
+	public function createEntity($row = [])
 	{
 		$className = $this->className;
 		

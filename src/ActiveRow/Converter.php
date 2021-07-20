@@ -75,6 +75,7 @@ class Converter
 							throw new \Exception("Invalid bool value $value");
 					}
 				case 'DateTime':
+				case "\\DateTime":
 					/*$dt = new \DateTime();
 					$dt->setTimestamp((int)$value);
 					return $dt; */

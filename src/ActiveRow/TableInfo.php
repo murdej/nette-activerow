@@ -7,11 +7,13 @@ class TableInfo
 	public $tableName;
 	
 	public $className;
-	
+
+	/** @var ColumnInfo[] */
 	public $primary = [];
 	
 	public $fkColumns = [];
 	
+	/** @var ColumnInfo[] */
 	public $columns = [];
 	
 	public $defaults = [];

@@ -188,5 +188,9 @@ class ColumnInfo // extends \Nette\Object
 			'fkSuffix' => 'Id',
 		]
 	];
-	
+
+	public static function getLength(string $className, string $columnName) : ?int {
+		$ti = new TableInfo($className);
+		return $ti->columns[$columnName]->typeLen;
+	}
 }

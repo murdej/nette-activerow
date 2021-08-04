@@ -27,6 +27,8 @@ class Converter
 			if ($columnInfo->autoIncrement) return null;
 			// u fk je načtení hodnoty null povoleno aby bylo možné testovat jestli je nastaveno
 			if ($columnInfo->fkClass) return null;
+			// pokud je default hodnota nastav
+			if ($columnInfo->defaultValue !== null) return $columnInfo->defaultValue;
 			 
 			throw new \Exception("Column ".($columnInfo->tableInfo ? $columnInfo->tableInfo->className.'::' : '')."$columnInfo->fullName is not nullable");
 		}

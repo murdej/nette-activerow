@@ -85,6 +85,7 @@ class ColumnInfo // extends \Nette\Object
 				{
 					$this->type = substr($this->type, 1);
 					$this->nullable = true;
+                    $flagList[] = "nullable";
 				}
 				if ($this->type == "\DateTime") $this->type == "DateTime";
 				if ($this->type == 'autoIncrement')

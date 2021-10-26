@@ -4,6 +4,7 @@ namespace  Murdej\ActiveRow;
 
 use App\Repositories\DBRepos;
 use Nette\Database\Explorer;
+use Nette\Database\Table\Selection;
 use Nette\SmartObject;
 use PHPStan\Type\CallableType;
 
@@ -61,7 +62,7 @@ class DBRepository extends \Nette\NObject
 
 	/**
 	 * @param null $tableName
-	 * @return mixed
+	 * @return mixed|Selection
 	 */
 	public function newTable($tableName = null)
 	{

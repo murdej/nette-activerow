@@ -7,7 +7,8 @@ namespace Murdej\ActiveRow;
  */
 trait TRepository
 {
-	public DBRepository $dbRepository;
+    /** @var DBRepository  */
+	public /*DBRepository*/ $dbRepository;
 
 	/** @return ?T */
 	public function get($pk)

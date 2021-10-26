@@ -39,9 +39,9 @@ trait TBaseEntity
 	{
 	}
 
-	public function save()
+	public function save() 
 	{
-		$this->_dbEntity->save();
+		return $this->_dbEntity->save();
 	}
 
 	public function toArray($cols = null, $fkObjects = false, $prefix = '')

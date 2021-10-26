@@ -240,6 +240,7 @@ class DBEntity extends \Nette\NObject
 	
 	public function save()
 	{
+	    $isModified = false;
 		$this->callEvent('beforeSave');
 		if (is_array($this->src))
 		{
@@ -254,18 +255,23 @@ class DBEntity extends \Nette\NObject
 			$this->converted = [];
 			$this->modified = [];
 			$this->callEvent('afterInsert');
+            $isModified = true;
 		}
 		else if (get_class($this->src) == 'Nette\\Database\\Table\\ActiveRow')
 		{
+		    $data = $this->getModifiedDbData(false);
 			$this->callEvent('beforeUpdate');
-			$this->src->update($this->getModifiedDbData(false));
+			$this->src->update($data);
 			$this->converted = [];
 			$this->modified = [];
 			$this->callEvent('afterInsert');
+            $isModified = !!$data;
 		} else {
 			throw new \Exception("Can not use Save");
 		}
 		$this->callEvent('afterSave');
+
+		return $isModified;
 	}
 
 	protected function callEvent($event, ...$params)

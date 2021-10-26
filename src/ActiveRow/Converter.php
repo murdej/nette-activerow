@@ -107,6 +107,8 @@ class Converter
 					return $value; // $value->getTimestamp();
 				case 'int':
 					return $value === '' ? null : (int)$value;
+                case 'float':
+                    return $value === '' ? null : floatval($value);
 			}
 			return $value;
 		}

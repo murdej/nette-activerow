@@ -221,7 +221,7 @@ class DBEntity extends \Nette\NObject
 			if ($colInfo->serialize && array_key_exists($col, $this->converted))
 			{
 				$dbValue = Converter::get()->convertFrom($this->converted[$col], $colInfo);
-				if (!array_key_exists($col, $this->src) || $dbValue != $this->src[$col])
+				if (!isset($col, $this->src) || $dbValue != $this->src[$col])
 					$res[$colInfo->columnName] = $dbValue;
 			}
 			if ($forInsert)

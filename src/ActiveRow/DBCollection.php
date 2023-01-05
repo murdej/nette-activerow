@@ -99,6 +99,7 @@ class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess,
 		$res = [];
 		foreach($this->getSelection() as $row)
 		{
+			if ($rowIsArray) $row = $row->toArray();
 			/* $arow = [];
 			if ($row) */
 			$res[] = $row/*->toArray()*/;

@@ -10,7 +10,7 @@ class Converter
 	}
 	
 	// Konverze z DB do Ent
-	public function convertTo($value, $columnInfo, $col)
+	public function convertTo($value, $columnInfo, $col, DBEntity $dbEntity)
 	{
 		if ($columnInfo->serialize)
 		{
@@ -35,8 +35,14 @@ class Converter
 		if ($columnInfo->fkClass && $col == $columnInfo->propertyName) 
 		{
 			$cls = $columnInfo->fkClass;
-			return $cls::repository()->createEntity($value);
-		} 
+            //todo: nestatické repo
+            if (method_exists($cls, 'repository')) {
+			    return $cls::repository()->createEntity($value);
+            } else {
+                $repo = new DBRepository($cls, $dbEntity->db);
+                return $repo->createEntity($value);
+            }
+		}
 		else 
 		{
 			switch($columnInfo->type)
@@ -90,7 +96,7 @@ class Converter
 	}
 
 	// Konverze z entity do DB
-	public function convertFrom($value, $columnInfo)
+	public function convertFrom($value, $columnInfo/*, $dbEntity */)
 	{
 		if ($value === null) return null;
 		if ($columnInfo->serialize)

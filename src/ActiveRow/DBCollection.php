@@ -108,7 +108,19 @@ class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess,
 		return $res;
 	}
 
-	protected function getColValue($row, $col)
+    public function fetchArray(bool $rowIsArray = false): array
+    {
+        $res = [];
+        foreach($this as $row)
+        {
+            if ($rowIsArray) $row = $row->toArray();
+            $res[] = $row;
+        }
+
+        return $res;
+    }
+
+    protected function getColValue($row, $col)
 	{
 		if (is_string($col))
 			return $row->$col;

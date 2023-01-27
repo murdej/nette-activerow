@@ -158,10 +158,17 @@ class DBEntity extends \Nette\NObject
 					// Volání FKO na novém objektu
 					if ($colDef->fkClass && $col == $colDef->propertyName)
 					{
-						$className = $colDef->fkClass; 
-						$val = $className::get($this->get($colDef->columnName));
-						$val = $val ? $val->_dbEntity->src : null;
-					} 
+						$className = $colDef->fkClass;
+                        if (method_exists($className, 'get')) {
+                            $val = $className::get($this->get($colDef->columnName));
+                            $val = $val ? $val->_dbEntity->src : null;
+                        } else {
+                            //
+                            $repo = new DBRepository($className, $this->db);
+                            $val = $repo->get($this->get($colDef->columnName));
+                            $val = $val ? $val->_dbEntity->src : null;
+                        }
+					}
 					else if (!$colDef->nullable)
 					{
 						// Default hodnoty nenull primitivních typů
@@ -195,7 +202,7 @@ class DBEntity extends \Nette\NObject
 				: null
 			); */
 		
-		return Converter::get()->convertTo($val, $this->dbInfo->columns[$col], $col);
+		return Converter::get()->convertTo($val, $this->dbInfo->columns[$col], $col, $this);
 	}
 
 	public function __construct($entity, $src = [])

@@ -187,7 +187,15 @@ class DBEntity extends \Nette\NObject
 				if ($colDef->fkClass && $col == $colDef->propertyName)
 				{
 					$className = $colDef->fkClass; 
-					$val = $className::get($this->get($colDef->columnName));
+					// $val = $className::get($this->get($colDef->columnName));
+					if (method_exists($className, 'repository')) {
+						return $className::get($this->get($colDef->columnName));
+					} else {
+						$repo = new DBRepository($className, $this->db);
+						return $repo->get($this->get($colDef->columnName));
+					}
+
+					
 					$val = $val ? $val->_dbEntity->src : null;
 				}
 			} 

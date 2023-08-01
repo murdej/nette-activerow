@@ -23,10 +23,18 @@ class DbDeploy
 			self::OrderIndex => [],
 			self::OrderFK => [],
 		];
-		foreach($ti->columns as $k => $column)
+        $columnsByPropertyName = []; // $ti->columns;
+        foreach ($ti->columns as $column) $columnsByPropertyName[$column->propertyName] = $column;
+        foreach ($columnsByPropertyName as $k => $column) {
+            if ($column->fkClass && isset($columnsByPropertyName[$column->propertyName]))
+                $columnsByPropertyName[$column->columnName] = $column;
+        }
+		foreach(array_unique(array_map(fn($c) => $c->columnName, $columnsByPropertyName)) as $k) // $ti->columns as $k => $column)
+        // foreach($columnsByPropertyName as $column)
 		{
-			if ($k == $column->columnName)
-				$this->createColumn($column, $tableSqlParts);
+            $column = $columnsByPropertyName[$k];
+			// if ($k == $column->columnName)
+            $this->createColumn($column, $tableSqlParts, $ti->columns);
 		}
 		if (!$ti->tableName) throw new \Exception("No tableName for ".$ti->className);
 		$sql = 'CREATE TABLE '.$this->escapeName($ti->tableName)." ($nl";
@@ -65,23 +73,54 @@ class DbDeploy
 		return $sql;
 	}
 
-	public function createColumn(ColumnInfo $column, array &$sqlParts)
-	{
+    /**
+     * @param ColumnInfo $column
+     * @param array $sqlParts
+     * @param ColumnInfo[] $allColumns
+     * @return void
+     * @throws \Exception
+     */
+	public function createColumn(
+        ColumnInfo $column,
+        array &$sqlParts,
+        array $allColumns
+    ) {
+        // dump($allColumns);
 		$line = [];
-		$line[] = $this->escapeName($column->columnName);
-		$t = $this->getSqlDataType($column);
-		$line[] = $t[0];
-		$line[] = $column->nullable ? 'NULL' : 'NOT NULL';
-		if ($column->autoIncrement)
-		{
-			$line[] = 'AUTO_INCREMENT PRIMARY KEY';
-		}
-		if ($column->unique) $line[] = 'UNIQUE KEY';
-		if ($column->primary) $line[] = 'PRIMARY KEY';
-		if (isset($t[1])) $line[] = $t[1];
+        // $eq = $column->columnName == $column->propertyName;
+        $identical = true; // $eq; // || (($column->fkClass || $column->fkTable) && $column->type !== "int");
 
-		$sqlParts[self::OrderCol][] = implode(' ', $line);
-		
+        /* if (!$identical) {
+            // projdi všechny pole a pokud neexistuje *Id tak pusť
+            $existsId = false;
+            foreach ($allColumns as $c) {
+                if ($column->columnName == $c->columnName && ($c->fkClass !! $c->propertyName)) {
+                    $existsId = true;
+                    break;
+                }
+            }
+            $identical = !$existsId;
+        } */
+            // $column->columnName == $column->propertyName
+            // || !count(array_filter($allColumns, fn($c) => $c->propertyName == $c->columnName && $c->propertyName == $column->propertyName))
+
+        if ($identical)
+        {
+            $line[] = $this->escapeName($column->columnName);
+            $t = $this->getSqlDataType($column);
+            $line[] = $t[0];
+            $line[] = $column->nullable ? 'NULL' : 'NOT NULL';
+            if ($column->autoIncrement)
+            {
+                $line[] = 'AUTO_INCREMENT PRIMARY KEY';
+            }
+            if ($column->unique) $line[] = 'UNIQUE KEY';
+            if ($column->primary) $line[] = 'PRIMARY KEY';
+            if (isset($t[1])) $line[] = $t[1];
+
+		    $sqlParts[self::OrderCol][] = implode(' ', $line);
+        }
+
 		// fk
 		if ($column->fkClass)
 		{

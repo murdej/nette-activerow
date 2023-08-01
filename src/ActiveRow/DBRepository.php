@@ -35,8 +35,24 @@ class DBRepository extends \Nette\NObject
 	 * @var callable
 	 */
 	public static $databaseCreator = null;
-	
-	public function getDb()
+
+    public static function getSrcFiles(): array
+    {
+        $res = [];
+        foreach ([
+            'DBCollection',
+            'DBEntity',
+            'DBRepository',
+            'DBSelect',
+            'DBSqlQuery',
+        ] as $f) {
+            $res[] = __DIR__ . '/' . $f . '.php';
+        }
+
+        return $res;
+    }
+
+    public function getDb()
 	{
 		return self::getDatabase($this->database, TableInfo::get($this->className));
 	}
@@ -103,6 +119,7 @@ class DBRepository extends \Nette\NObject
 	 */
 	public function get($pk)
 	{
+        if ($pk === null) return null;
 		$dbr = $this->newTable()->select('*')->get($pk);
 		return $dbr ? $this->createEntity($dbr) : null;
 	}

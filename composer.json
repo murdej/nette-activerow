@@ -5,8 +5,8 @@
 	"license": ["GPL-3.0"],
 	"require": {
 		"php": ">= 7.1",
-		"nette/reflection": "^2.4",
-		"nette/database": "^2.4"
+		"nette/reflection": "^2.4 || ^3.0",
+		"nette/database": "^2.4 || ^3.0"
 	},
 	"minimum-stability": "dev",
 	"prefer-stable": true,

@@ -2,6 +2,8 @@
 
 namespace Murdej\ActiveRow;
 
+use BCNette\Reflection\ClassType;
+
 class TableInfo
 {
 	public $tableName;
@@ -26,7 +28,7 @@ class TableInfo
 	
 	public function parseClass($cn)
 	{
-		$ref = new \Nette\Reflection\ClassType($cn);
+		$ref = new ClassType($cn);
 		$anns = $ref->getAnnotations();
 		// dump($anns);
 		$this->className = $cn;

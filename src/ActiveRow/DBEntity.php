@@ -2,7 +2,7 @@
 
 namespace  Murdej\ActiveRow;
 
-use Nette\Reflection\ClassType;
+use BCNette\Reflection\ClassType;
 
 class DBEntity extends \Nette\NObject
 {

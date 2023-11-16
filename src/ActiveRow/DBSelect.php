@@ -25,11 +25,25 @@ class DBSelect extends DBCollection// \Nette\Object implements \Iterator, \Array
 
 	protected $prepared = false;
 
+    protected $selectFields = [];
+
+    public function select(string $sql, ...$args): self {
+        $this->selectFields[] = [$sql, $args];
+        return $this;
+    }
+
+	/**
+	 * @return 
+	 */
 	public function getSelection()
 	{
 		if (!$this->prepared)
 		{
-			$this->selection->select('`'.$this->repository->tableInfo->tableName.'`.*');
+			if ($this->selectFields) {
+                foreach ($this->selectFields as $field)
+                    $this->selection->select($field[0], ...$field[1]);
+            }
+            else $this->selection->select('`'.$this->repository->tableInfo->tableName.'`.*');
 			$order = $this->repository->tableInfo->defaultOrder;
 			if ($order) $this->order($order);
 			$this->prepared = true;

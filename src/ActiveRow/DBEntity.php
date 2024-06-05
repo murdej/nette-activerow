@@ -3,9 +3,15 @@
 namespace  Murdej\ActiveRow;
 
 use BCNette\Reflection\ClassType;
+use Nette\SmartObject;
 
-class DBEntity extends \Nette\NObject
+/**
+ * @property-read \Nette\Database\Explorer|\Nette\Database\Context
+ */
+
+class DBEntity
 {
+	use SmartObject;
 
 	public $src;
 	

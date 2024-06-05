@@ -67,6 +67,8 @@ trait TBaseEntity
 		}
 	}
 
+	// Backward compatibility
+	#[\ReturnTypeWillChange]
 	public function jsonSerialize()
 	{
 		return $this->toArray();

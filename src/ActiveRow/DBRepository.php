@@ -2,28 +2,28 @@
 
 namespace  Murdej\ActiveRow;
 
-use App\Repositories\DBRepos;
+use Nette\Database\Context;
 use Nette\Database\Explorer;
 use Nette\Database\Table\Selection;
 use Nette\SmartObject;
-use PHPStan\Type\CallableType;
 
 /**
  * @template T
  * @property TableInfo $tableInfo
+ * @property Explorer|Context $db
  */
-class DBRepository extends \Nette\NObject
+class DBRepository // extends \Nette\NObject
 {
-	// use SmartObject;
+	use SmartObject;
 
-	/** @var Nette\Database\Context */
+	/** @var Context|Explorer */
 	public $database = null;
 	
 	public $className = null;
 
 	/**
 	 * @param class-string<T> $cn
-	 * @param Explorer|null $db
+	 * @param Context|Explorer|null $db
 	 */
 	function __construct($cn, $db = null)
 	{

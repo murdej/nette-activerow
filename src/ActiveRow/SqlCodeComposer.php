@@ -16,6 +16,4 @@ class SqlCodeComposer
             )
             : [ $this->query, $this->vars ];
     }
-
-    co
 }

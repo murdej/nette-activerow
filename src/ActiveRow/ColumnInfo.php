@@ -76,7 +76,7 @@ class ColumnInfo // extends \Nette\Object
 					[$_, $type, $propertyName, $_, $typeLen, $typeDec, $defaultValue, $_, $flags] = $m2 + [null, null, null, null, null, null, null, null, null];
 				}
 				// dump($m);
-				$flagList = explode(',', $flags);
+				$flagList = explode(',', $flags ?: "");
 				if (in_array("autoIncrement", $flagList)) $type = "autoIncrement";
 				if (in_array("json", $flagList)) $type = "json";
 				$this->propertyName = $this->columnName = trim($propertyName);
@@ -93,8 +93,8 @@ class ColumnInfo // extends \Nette\Object
 					Convention::autoIncrement($this);
 				}
 				$this->typeLen = trim($typeLen) ? (int)$typeLen : null;
-				$this->typeDec = strlen(trim($typeDec)) > 1 ? (int)substr($typeDec, 1) : null;
-				$this->defaultValue = strlen(trim($defaultValue)) > 1 ? substr($defaultValue, 1) : null;
+				$this->typeDec = strlen(trim($typeDec ?: '')) > 1 ? (int)substr($typeDec, 1) : null;
+				$this->defaultValue = strlen(trim($defaultValue ?: '')) > 1 ? substr($defaultValue, 1) : null;
 				if ($this->defaultValue)
 				{
 					switch($this->type)

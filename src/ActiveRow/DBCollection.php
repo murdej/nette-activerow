@@ -11,58 +11,72 @@ class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess,
 
 	public $selection;
 
+	/**
+	 * @var DBRepository
+	 */
 	public $repository;
-	
+
+	#[\ReturnTypeWillChange]
 	function rewind() 
 	{
 		return $this->getSelection()->rewind();
 	}
 
-	function current() 
+	#[\ReturnTypeWillChange]
+	function current()
 	{
 		return $this->repository->createEntity($this->getSelection()->current());
 	}
 
-	function key() 
+	#[\ReturnTypeWillChange]
+	function key()
 	{
 		return $this->getSelection()->key();
 	}
 
-	function next() 
+	#[\ReturnTypeWillChange]
+	function next()
 	{
 		return $this->getSelection()->next();
 	}
 
-	function valid() 
+	#[\ReturnTypeWillChange]
+	function valid()
 	{
 		return $this->getSelection()->valid();
 	}
-	
+
+	#[\ReturnTypeWillChange]
 	public function offsetSet($offset, $value)
 	{
 		return $this->getSelection()->offsetSet($offset, $value);
 	}
 
+	#[\ReturnTypeWillChange]
 	public function offsetExists($offset)
 	{
 		return $this->getSelection()->offsetExists($offset);
 	}
 
+	#[\ReturnTypeWillChange]
 	public function offsetUnset($offset)
 	{
 		return $this->getSelection()->offsetUnset($offset);
 	}
 
-	public function offsetGet($offset) 
+	#[\ReturnTypeWillChange]
+	public function offsetGet($offset)
 	{
 		return $this->repository->createEntity($this->getSelection()->offsetGet($offset));
 	}
 
-	public function count() 
+	#[\ReturnTypeWillChange]
+	public function count()
 	{
 		return $this->getSelection()->count();
 	}
-	
+
+	#[\ReturnTypeWillChange]
 	public function exists()
 	{
 		return count($this->getSelection()) > 0;
@@ -148,7 +162,7 @@ class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess,
 		return $res;
 	}
 
-	public function jsonSerialize()
+	public function jsonSerialize(): mixed
 	{
 		return $this->toArray();
 	}

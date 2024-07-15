@@ -7,6 +7,7 @@ use Nette\SmartObject;
 
 /**
  * @property-read \Nette\Database\Explorer|\Nette\Database\Context
+ * @property-read TableInfo $dbInfo
  */
 
 class DBEntity
@@ -219,12 +220,12 @@ class DBEntity
 		return Converter::get()->convertTo($val, $this->dbInfo->columns[$col], $col, $this);
 	}
 
-	public function __construct($entity, $src = [])
+	public function __construct($entity, $src = [], $db = null)
 	{
 		$this->entity = $entity;
 		$this->src = $src;
 		$this->defaults = &$this->getDbInfo()->defaults;
-		
+		$this->db = $db;
 	}
 	
 	public function getModifiedDbData($forInsert = false)

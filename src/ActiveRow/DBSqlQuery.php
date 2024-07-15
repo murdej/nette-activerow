@@ -2,6 +2,9 @@
 
 namespace  Murdej\ActiveRow;
 
+use Nette\Database\ResultSet;
+use Nette\Database\Table\Selection;
+
 class DBSqlQuery extends DBCollection
 {
     use TSqlCodeComposer;
@@ -10,7 +13,7 @@ class DBSqlQuery extends DBCollection
 
 	protected $_selection = null;
 	
-	public function getSelection()
+	public function getSelection(): Selection|ResultSet
 	{
 		if ($this->_selection === null)
 			$this->_selection = $this->exec();

@@ -44,7 +44,7 @@ trait TBaseEntity
 		return $this->_dbEntity->save();
 	}
 
-	public function toArray($cols = null, $fkObjects = false, $prefix = '')
+	public function toArray($cols = null, $fkObjects = false, $prefix = ''): array
 	{
 		return $this->_dbEntity->toArray($cols, $fkObjects, $prefix);
 	}

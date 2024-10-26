@@ -102,7 +102,7 @@ class TableInfo
 	
 	public function __construct($cn)
 	{
-		$this->parseClass($cn);
+		if ($cn) $this->parseClass($cn);
 	}
 
 	protected static $dbInfoCache = [];
@@ -116,8 +116,13 @@ class TableInfo
 		
 		return self::$dbInfoCache[$className];
 	}
-	
-	public static function getFullClassName($className, $nameSpace)
+
+    public static function tableName($className) : string
+    {
+        self::get($className)->tableName;
+    }
+
+    public static function getFullClassName($className, $nameSpace)
 	{
 		return (strpos($className, '\\') == false) 
 			? $nameSpace.'\\'.$className
@@ -134,7 +139,7 @@ class TableInfo
 
 	protected $_columnNames = null;
 
-	public function getColumnNames()
+	public function getColumnNames(?bool $inDb = null)
 	{
 		if ($this->_columnNames === null)
 		{
@@ -142,8 +147,10 @@ class TableInfo
 			foreach($this->columns as $colName => $col)
 			{
 				// dump($col);
-				$this->_columnNames[] = $colName; //$col->propertyName; 
-				// if ($col->fkClass) $this->_columnNames[] = $col->propertyName;
+                if ($inDb === null || ($inDb === ($col->columnName === $col->propertyName))) {
+                    $this->_columnNames[] = $colName; //$col->propertyName;
+                    // if ($col->fkClass) $this->_columnNames[] = $col->propertyName;
+                }
 			}
 		}
 

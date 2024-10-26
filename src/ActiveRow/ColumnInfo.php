@@ -46,9 +46,13 @@ class ColumnInfo // extends \Nette\Object
 
 	public $serialize = false;
 	
-	public $tableInfo = null;
-	
-	public function getFullName()
+	public ?TableInfo $tableInfo = null;
+
+    public ?string $dbType = null;
+
+    public ?string $dbBaseType = null;
+
+    public function getFullName()
 	{
 		return $this->propertyName;
 	}
@@ -62,7 +66,7 @@ class ColumnInfo // extends \Nette\Object
 			$m2 = null;
 			if (
 				preg_match('/^([\\\\?A-Za-z_][\\\\0-9A-Za-z_]*)(\\[([0-9]*)(,[0-9]*)?(,[^\\]]*)?\\])? *(\\(([!\\?A-Za-z_0-9,]*)\\))? \\$([A-Za-z_][0-9A-Za-z_]*)$/', $ann, $m1)
-				|| preg_match('/^([\\\\?A-Za-z_][\\\\0-9A-Za-z_]*) \\$([A-Za-z_][0-9A-Za-z_]*) *(\\[([0-9]*)(,[0-9]*)?(,[^\\]]*)?\\])? *(\\(([!\\?A-Za-z_0-9,]*)\\))?$/', $ann, $m2)
+				|| preg_match('/^([\\\\?A-Za-z_][\\\\0-9A-Za-z_]*) \\$([A-Za-z_][0-9A-Za-z_]*) *(\\[([0-9]*)(,[0-9]*)?(,[^\\]]*)?\\])? *(\\(([!\\?A-Za-z_0-9,=]*)\\))?$/', $ann, $m2)
 				)
 			{
 				if ($m1)
@@ -87,7 +91,7 @@ class ColumnInfo // extends \Nette\Object
 					$this->nullable = true;
                     $flagList[] = "nullable";
 				}
-				if ($this->type == "\DateTime") $this->type == "DateTime";
+				if ($this->type == "\DateTime") $this->type = "DateTime";
 				if ($this->type == 'autoIncrement')
 				{
 					Convention::autoIncrement($this);
@@ -97,7 +101,7 @@ class ColumnInfo // extends \Nette\Object
 				$this->defaultValue = strlen(trim($defaultValue ?: '')) > 1 ? substr($defaultValue, 1) : null;
 				if ($this->defaultValue)
 				{
-					switch($this->type)
+					switch($this->dbBaseType)
 					{
 						case 'json':
 							switch($this->defaultValue)
@@ -155,7 +159,10 @@ class ColumnInfo // extends \Nette\Object
 							case "json":
 								break;
 							default:
-								throw new \Exception("Invalid column flag '$flag', property '$this->propertyInfo'");
+                                if (str_starts_with($flag, 'type=')) {
+                                    $this->dbBaseType = substr($flag, 5);
+                                }
+                                else throw new \Exception("Invalid column flag '$flag', property '$this->propertyInfo'");
 								break;
 						}
 					}
@@ -181,7 +188,7 @@ class ColumnInfo // extends \Nette\Object
 	public function __construct($ann, $ns, $tableInfo)
 	{
 		$this->tableInfo = $tableInfo;
-		$this->parseAnnotation($ann, $ns);
+		if ($ns) $this->parseAnnotation($ann, $ns);
 	}
 	
 	public static $config = [
@@ -193,5 +200,10 @@ class ColumnInfo // extends \Nette\Object
 	public static function getLength(string $className, string $columnName) : ?int {
 		$ti = new TableInfo($className);
 		return $ti->columns[$columnName]->typeLen;
+	}
+
+	public function getFkTableInfo() : ?TableInfo
+	{
+		return $this->fkClass ? TableInfo::get($this->fkClass) : null;
 	}
 }

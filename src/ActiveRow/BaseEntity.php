@@ -54,7 +54,7 @@ trait TBaseEntity
 	 * @param []|null $cols
 	 * @param []|null $ignoreCols
 	 */
-	public function fromArray($values, $cols = null, $ignoreCols = ['id'])
+	public function fromArray($values, $cols = null, $ignoreCols = ['id']): self
 	{
 		$columnNames = $this->_dbEntity->getDbInfo()->getColumnNames();
 		// dump($columnNames);
@@ -65,6 +65,8 @@ trait TBaseEntity
 				&& ($ignoreCols === null || !in_array($key, $ignoreCols))
 			) $this->$key = $value;
 		}
+
+        return $this;
 	}
 
 	// Backward compatibility

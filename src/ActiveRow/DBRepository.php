@@ -124,6 +124,15 @@ class DBRepository // extends \Nette\NObject
 		return $dbr ? $this->createEntity($dbr) : null;
 	}
 
+    /**
+     * @param array $conditions
+     * @return DBSelect<T>
+     */
+    public function findBy(array $conditions)
+    {
+        return $this->newSelect()->where($conditions);
+    }
+
 	/**
 	 * @param array $row
 	 * @return T

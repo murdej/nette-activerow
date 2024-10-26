@@ -5,6 +5,9 @@ namespace  Murdej\ActiveRow;
 use Nette;
 use Nette\SmartObject;
 
+/**
+ * @template T
+ */
 class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess, \Countable, \JsonSerializable
 {
 	use SmartObject;
@@ -82,12 +85,21 @@ class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess,
 		return count($this->getSelection()) > 0;
 	}
 
+    /**
+     * @return ?T
+     */
 	public function fetch()
 	{
 		$row = $this->getSelection()->fetch();
 		return $row ? $this->repository->createEntity($row) : null;
 	}
 
+    /**
+     * @param $key
+     * @param $value
+     * @return array<mixed,mixed|T>
+     * @throws \Exception
+     */
 	public function fetchPairs($key, $value = null)
 	{
 		$res = [];

@@ -110,7 +110,10 @@ class Converter
 				case 'json':
 					return json_encode($value);
 				case 'DateTime':
-					return $value; // $value->getTimestamp();
+                    if (!$value) return null;
+                    if (is_string($value)) return new \DateTime($value);
+                    return $value;
+					// return $value; // $value->getTimestamp();
 				case 'int':
 					return $value === '' ? null : (int)$value;
                 case 'float':

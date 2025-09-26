@@ -29,6 +29,11 @@ class TableInfo
 	public function parseClass($cn)
 	{
 		$ref = new ClassType($cn);
+		/* try {
+			$ref = new ClassType($cn);
+		} catch (\Throwable $e) {
+			throw new \Exception(''$e->getMessage(), $e->getCode(), $e);
+		} */
 		$anns = $ref->getAnnotations();
 		// dump($anns);
 		$this->className = $cn;

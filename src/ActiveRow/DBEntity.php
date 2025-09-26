@@ -27,6 +27,11 @@ class DBEntity
 	public $collection = null;
 
 	public $db = null;
+
+    /**
+     * @var ?callable
+     */
+    public static $globalEventHandler = null;
 	
 	public function get($col)
 	{
@@ -274,6 +279,9 @@ class DBEntity
 			$this->src = DBRepository::getDatabase($this->db, $this->dbInfo)
 				->table($this->dbInfo->tableName)
 				->insert($insertData);
+
+            DBModifyMonitor::saveRecord($this->dbInfo->tableName, 'insert', $insertData, null);
+
 			$this->converted = [];
 			$this->modified = [];
 			$this->callEvent('afterInsert');
@@ -284,7 +292,10 @@ class DBEntity
 		    $data = $this->getModifiedDbData(false);
 			$this->callEvent('beforeUpdate');
 			$this->src->update($data);
-			$this->converted = [];
+
+            if ($data) DBModifyMonitor::saveRecord($this->dbInfo->tableName, 'update', $data, null);
+
+            $this->converted = [];
 			$this->modified = [];
 			$this->callEvent('afterInsert');
             $isModified = !!$data;
@@ -305,6 +316,9 @@ class DBEntity
 			$method = $dbi->events[$event];
 			$r = $this->entity->$method($event, ...$params);
 		}
+        if (DBEntity::$globalEventHandler) {
+            DBEntity::$globalEventHandler($event, ...$params);
+        }
 
 		return $r;
 	}

@@ -47,7 +47,7 @@ class DbDeploy
 		{
 			foreach($tableSqlParts[$i] as $item)
 			{
-				$sqlParts[$i][] = "ALTER TABLE ".$this->escapeName($ti->tableName)." ADD ".$item;
+                $sqlParts[$i][] = $item;
 			}
 		}
 	}
@@ -82,11 +82,11 @@ class DbDeploy
 		foreach($tis as [$tia, $tid])
 		{
 			if ($tid){
-                $this->message("Alter table {$tia->tableName}");
+                // $this->message("Alter table {$tia->tableName}");
 				$this->alterTable($tia, $tid, $sqlParts);
             }
 			else {
-                $this->message("Create table {$tia->tableName}");
+                // $this->message("Create table {$tia->tableName}");
 				$this->createTable($tia, $sqlParts);
             }
 		}
@@ -197,7 +197,8 @@ class DbDeploy
 				$t = 'DATETIME';
 				break;
 			default:
-				throw new \Exception("Unknown type ".($column->tableInfo ? $column->tableInfo->className.'::' : '')."$column->type");
+                print_r($column);
+				throw new \Exception("Unknown type ".($column->tableInfo ? $column->tableInfo->className.'::' : '')."$column->type / $column->dbBaseType");
 		}
 		return [$t, $ch];
 	}
@@ -243,7 +244,7 @@ class DbDeploy
 					|| $dbColumn->dbType != strtolower($this->getSqlDataType($appColumn)[0])
 				) {
 					foreach($sqlParts[self::OrderCol] as $colSql) {
-						$sqlAllParts[self::OrderCol][] = 'ALTER TABLE ' . $appTable->tableName . " MODIFY  $colSql"; // `" . $dbColumn->columnName ."`
+                        $sqlAllParts[self::OrderCol][] = 'ALTER TABLE ' . $appTable->tableName . " MODIFY  $colSql"; // `" . $dbColumn->columnName ."`
 					}
 					// $f = false;
 				}

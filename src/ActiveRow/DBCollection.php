@@ -138,6 +138,24 @@ class DBCollection /*extends \Nette\Object*/ implements \Iterator, \ArrayAccess,
 		return $res;
 	}
 
+    /**
+     * @param bool $rowIsArray
+     * @return array<string,mixed>[]
+     */
+    public function fetchArrayWithExtraFields() : array
+    {
+        $res = [];
+        foreach($this->getSelection() as $dbRow)
+        {
+            $row = [];
+            foreach ($dbRow as $k => $v) $row[$k] = $v;
+            foreach ($this->repository->createEntity($dbRow)->toArray() as $k => $v) $row[$k] = $v;
+            $res[] = $row;
+        }
+
+        return $res;
+    }
+
     public function fetchArray(bool $rowIsArray = false): array
     {
         $res = [];

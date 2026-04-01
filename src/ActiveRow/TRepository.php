@@ -27,7 +27,7 @@ trait TRepository
 		return $ent;
 	}
 
-	/** @return ?T */
+	/** @return T|null */
 	public function getBy($filter)
 	{
 		return $this->dbRepository->getBy($filter);

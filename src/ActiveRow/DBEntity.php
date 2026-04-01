@@ -251,13 +251,13 @@ class DBEntity
 				if (!isset($col, $this->src) || $dbValue != $this->src[$col])
 					$res[$colInfo->columnName] = $dbValue;
 			}
-			if ($forInsert)
-			{
+			if ($forInsert) {
 				// Pro insert i default hodnoty
-				if ($colInfo->defaultValue !== null && !in_array($col, $this->modified))
-				{
-					if (!array_key_exists($col, $this->converted)) $this->get($col);
-					$res[$colInfo->columnName] = Converter::get()->convertFrom($this->converted[$col], $this->dbInfo->columns[$col]);
+				if (!in_array($col, $this->modified))
+					if ($colInfo->defaultValue !== null) {
+						if (!array_key_exists($col, $this->converted)) $this->get($col);
+						$res[$colInfo->columnName] = Converter::get()->convertFrom($this->converted[$col], $this->dbInfo->columns[$col]);
+					}
 				}
 			}
 		}

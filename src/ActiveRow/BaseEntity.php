@@ -54,16 +54,23 @@ trait TBaseEntity
 	 * @param []|null $cols
 	 * @param []|null $ignoreCols
 	 */
-	public function fromArray($values, $cols = null, $ignoreCols = ['id']): self
+	public function fromArray($values, ?array $cols = null, array $ignoreCols = ['id'], bool $autoConvert = false): self
 	{
-		$columnNames = $this->_dbEntity->getDbInfo()->getColumnNames();
+        $converter = $autoConvert ? new Converter() : null;
+        $dbInfo = $this->_dbEntity->getDbInfo();
+		$columnNames = $dbInfo->getColumnNames();
 		// dump($columnNames);
 		foreach ($values as $key => $value)
 		{
 			if (in_array($key, $columnNames)
 				&& ($cols === null || in_array($key, $cols))
 				&& ($ignoreCols === null || !in_array($key, $ignoreCols))
-			) $this->$key = $value;
+			) {
+                if ($converter && $dbInfo->columns[$key] ?? false) {
+                    $value = $converter->convertTo($value, $dbInfo->columns[$key], $key, $this->_dbEntity);
+                }
+                $this->$key = $value;
+            }
 		}
 
         return $this;

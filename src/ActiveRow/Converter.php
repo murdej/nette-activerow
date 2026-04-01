@@ -87,6 +87,9 @@ class Converter
 					/*$dt = new \DateTime();
 					$dt->setTimestamp((int)$value);
 					return $dt; */
+                    if (is_string($value)) {
+                        $value = new \DateTime($value);
+                    }
 					return $value;
 				default:
 					throw new \Exception("Unknown type ".($columnInfo->tableInfo ? $columnInfo->tableInfo->className.'::' : '')."$columnInfo->type");

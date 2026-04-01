@@ -15,7 +15,9 @@ class TableInfo
 	
 	public $fkColumns = [];
 	
-	/** @var ColumnInfo[] */
+	/**
+     * @var string<string,ColumnInfo>
+     */
 	public $columns = [];
 	
 	public $defaults = [];

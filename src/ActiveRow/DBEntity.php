@@ -237,24 +237,21 @@ class DBEntity
 	{
 		$res = [];
 		// přímo modifikované
-		foreach($this->modified as $col)
-		{
+		foreach ($this->modified as $col) {
 			$colInfo = $this->dbInfo->columns[$col];
 			$res[$colInfo->columnName] = Converter::get()->convertFrom($this->converted[$col], $this->dbInfo->columns[$col]);
 		}
-		foreach($this->dbInfo->columns as $col => $colInfo)
-		{
+		foreach ($this->dbInfo->columns as $col => $colInfo) {
 			// serializované
-			if ($colInfo->serialize && array_key_exists($col, $this->converted))
-			{
+			if ($colInfo->serialize && array_key_exists($col, $this->converted)) {
 				$dbValue = Converter::get()->convertFrom($this->converted[$col], $colInfo);
 				if (!isset($col, $this->src) || $dbValue != $this->src[$col])
 					$res[$colInfo->columnName] = $dbValue;
 			}
 			if ($forInsert) {
 				// Pro insert i default hodnoty
-				if (!in_array($col, $this->modified))
-					if ($colInfo->defaultValue !== null) {
+				if (!in_array($col, $this->modified)) {
+					if ($colInfo->defaultValue !== null || array_key_exists($col, $this->dbInfo->defaults)) {
 						if (!array_key_exists($col, $this->converted)) $this->get($col);
 						$res[$colInfo->columnName] = Converter::get()->convertFrom($this->converted[$col], $this->dbInfo->columns[$col]);
 					}

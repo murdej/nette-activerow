@@ -15,9 +15,15 @@ class Converter
 		if ($columnInfo->serialize)
 		{
 			$className = $columnInfo->type;
-			$obj = new $className();
-			$obj->fromDbValue($value);
-			
+            if (is_callable([$className, 'fromDbValue'])) {
+                // statická metoda
+                $obj = $className::fromDbValue($value);
+            } else {
+                // instanční metoda
+                $obj = new $className();
+                $obj->fromDbValue($value);
+            }
+
 			return $obj;
 		}
 		if ($value === null)
@@ -32,7 +38,10 @@ class Converter
 			 
 			throw new \Exception("Column ".($columnInfo->tableInfo ? $columnInfo->tableInfo->className.'::' : '')."$columnInfo->fullName is not nullable");
 		}
-		if ($columnInfo->fkClass && $col == $columnInfo->propertyName) 
+        if (interface_exists('\BackedEnum') && is_subclass_of($columnInfo->type, \BackedEnum::class)) {
+            return ($columnInfo->type)::tryFrom($value);
+        }
+		if ($columnInfo->fkClass && $col == $columnInfo->propertyName)
 		{
 			$cls = $columnInfo->fkClass;
             //todo: nestatické repo
@@ -108,6 +117,9 @@ class Converter
 		} 
 		else
 		{
+            if (interface_exists('\BackedEnum') && is_subclass_of($columnInfo->type, \BackedEnum::class)) {
+                return $value->value;
+            }
 			switch($columnInfo->type)
 			{
 				case 'json':
@@ -116,7 +128,6 @@ class Converter
                     if (!$value) return null;
                     if (is_string($value)) return new \DateTime($value);
                     return $value;
-					// return $value; // $value->getTimestamp();
 				case 'int':
 					return $value === '' ? null : (int)$value;
                 case 'float':

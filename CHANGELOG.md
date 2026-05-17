@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## v1.3.1
+
+ - Fix PHP 8.5 deprecated
+
+## v1.3.0
 
 ### Added
 - Support for PHP `BackedEnum` types: columns typed as a `BackedEnum` subclass are now automatically converted from/to the enum's raw value when reading from or writing to the database.
